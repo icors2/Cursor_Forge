@@ -1,0 +1,9 @@
+{
+  "name": "cursor-project-starter",
+  "private": true,
+  "type": "module",
+  "description": "Blank Cursor IDE repo with MCP, skills, assets, and working-memory rules",
+  "scripts": {
+    "audit": "node scripts/audit-cursor-setup.mjs"
+  }
+}

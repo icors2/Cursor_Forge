@@ -1,0 +1,23 @@
+---
+description: Learned coding and repository conventions. Apply when writing or reviewing project files.
+alwaysApply: false
+---
+
+# Conventions
+
+Add a bullet only after it is a real project habit. Do not paste a style guide.
+
+## Repository
+
+- Project rules are `.mdc` files under `.cursor/rules/` (nested folders are fine).
+- Skills live at `.cursor/skills/<name>/SKILL.md` with `name` matching the folder.
+- Secrets stay out of git. Use `.env` locally and `${env:NAME}` in `.cursor/mcp.json`.
+- Prefer official scaffolds (`create-next-app`, `uv init`, `cargo new`) over hand-rolled config.
+
+## After bootstrap
+
+- Replace this section with conventions the agent actually observed or the user stated.
+
+<!--
+- Example: API routes return `{ ok, data, error }` and never raw strings.
+-->

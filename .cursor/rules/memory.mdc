@@ -1,0 +1,45 @@
+---
+alwaysApply: true
+---
+
+# Working memory
+
+Agents update this file. It is the living snapshot of the project.
+
+## Status
+
+- **Status:** unbootstrapped
+- **Updated:** 2026-08-29
+
+## Project
+
+- **Name:** (unset)
+- **Purpose:** Cursor IDE starter. Not yet a product.
+- **Stack:** (unset)
+- **Package manager:** (unset)
+- **Deploy target:** (unset)
+
+## Current focus
+
+- First-run bootstrap: identify the product, then add MCP, skills, and assets.
+
+## Open questions
+
+- What is the user building?
+
+## Environment (names only)
+
+- Required env vars: (none yet)
+- Enabled MCP servers: (none)
+- Project skills beyond the starter set: (none)
+
+## People and systems
+
+- (none)
+
+## Pointers
+
+- Decisions: `.cursor/rules/decisions.mdc`
+- Conventions: `.cursor/rules/conventions.mdc`
+- Lessons: `.cursor/rules/lessons.mdc`
+- MCP catalog: `assets/mcp-catalog.md`

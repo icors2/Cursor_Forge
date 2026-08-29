@@ -1,0 +1,26 @@
+---
+description: Failure modes and fixes learned in this repo. Apply when debugging or repeating a past mistake.
+alwaysApply: false
+---
+
+# Lessons
+
+Write the mistake, the signal, and the fix. Newest first.
+
+## Cursor platform (from the template)
+
+- **`.md` in `.cursor/rules/` is ignored.** Use `.mdc` with frontmatter.
+- **Skill `name` must match the folder.** `shipping/land-it/SKILL.md` is the skill `land-it`.
+- **User-level `~/.cursor/*` does not reach Cloud Agents.** Put skills, rules, and MCP the project needs in the repo.
+- **Sandbox may block writes to `.cursor/*.json`.** Rules and skills are writable; `mcp.json` may not be.
+- **Do not hardcode secrets in `mcp.json`.** Use `${env:NAME}` or Cloud Secrets.
+- **Cloud MCP does not support SSE or `mcp-remote`.** Prefer HTTP.
+- **`environment.json` `install` is not for long-running processes.** Use `start` / `terminals`.
+
+<!--
+## YYYY-MM-DD — Short title
+
+- What happened:
+- Signal:
+- Fix:
+-->

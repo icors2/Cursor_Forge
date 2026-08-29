@@ -1,0 +1,24 @@
+---
+description: Architecture and tool decisions (ADRs). Apply when choosing or changing stack, MCP, deploy, or structure.
+alwaysApply: false
+---
+
+# Decisions
+
+Record choices that later agents should not silently reverse. Newest first.
+
+## Template defaults (2026-08-29)
+
+- **Working memory lives in project rules**, not chat and not `~/.cursor`. Cloud Agents only see the repo.
+- **Skills for workflows, rules for constraints.** Bootstrap, MCP, and memory updates are skills.
+- **MCP is opt-in.** The catalog is in `assets/mcp-catalog.md`. `.cursor/mcp.json` starts empty.
+- **No application stack until bootstrap.** Do not assume Next.js, Python, or any framework.
+
+<!--
+## YYYY-MM-DD — Short title
+
+- Decision:
+- Why:
+- Alternatives rejected:
+- Revisit when:
+-->
