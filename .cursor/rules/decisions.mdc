@@ -7,6 +7,23 @@ alwaysApply: false
 
 Record choices that later agents should not silently reverse. Newest first.
 
+## 2026-08-29 — Vibe coder capability layer
+
+- **Decision:** Golden path (`assets/stack-playbooks/golden-path.md`) is **opt-in** when the user has no stack preference — not an automatic default.
+- **Why:** Speed for vibe coding without trapping users who named a stack.
+- **Alternatives rejected:** Golden path as hard default; stay fully silent with no opinionated option.
+- **Revisit when:** Most clones pick the same stack in practice.
+
+- **Decision:** Feature integrations use one `add-integration` skill plus `assets/recipes/*.md`, not six nearly identical skills.
+- **Why:** One procedure; stack/vendor detail stays on-demand; Cloud Agents get portable recipes without user-level vendor skills.
+- **Alternatives rejected:** One skill per integration; relying only on `~/.cursor` vendor skills.
+- **Revisit when:** A recipe grows large enough to need its own skill (migrations already did → `migrate-database`).
+
+- **Decision:** UI polish is a `polish-ui` skill + `assets/checklists/ui-polish.md` (verifiable), with globbed `30-frontend.mdc` for local habits.
+- **Why:** Vibe users judge on look/feel; always-apply must stay short.
+- **Alternatives rejected:** Dumping a full style guide into always-apply rules.
+- **Revisit when:** The product adopts a stricter design system.
+
 ## 2026-08-29 — Agent starter hardening
 
 - **Decision:** Boilerplate (CI, GitHub templates, Docker, linters, hooks) stays under `assets/templates/` and is copied on demand — not materialized at repo root.

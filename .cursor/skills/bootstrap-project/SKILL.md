@@ -28,9 +28,13 @@ Set `Status` to `bootstrapping` in `memory.mdc` if you are going to continue.
 Infer from the user's request. Ask only for gaps:
 
 - What are we building? Who is it for?
-- Stack, if they did not name one (use the defaults in `assets/stack-playbooks/` — do not ask if a default is obvious)
+- Stack, if they did not name one:
+  - **No preference at all** → offer `assets/stack-playbooks/golden-path.md` (opt-in; confirm once)
+  - Named a stack → matching playbook in `assets/stack-playbooks/`
 - Deploy target (local-only is fine)
 - External systems (GitHub, Linear, Vercel, Stripe, Figma, Slack, a database, …)
+
+Vague "build me X" requests: run `scope-feature` before scaffolding.
 
 Write the answers into `memory.mdc` as you go.
 
@@ -38,9 +42,9 @@ Write the answers into `memory.mdc` as you go.
 
 If this repo is still a template and they asked to build something:
 
-- Follow the matching playbook in `assets/stack-playbooks/`
+- Follow the matching playbook in `assets/stack-playbooks/` (or confirmed golden path)
 - Prefer an official scaffold
-- Do not add auth, a database, or a second component library unless the request needs them
+- Do not add auth, a database, or a second component library unless the request needs them — use `add-integration` + `assets/recipes/` when they do
 
 If they only wanted the Cursor setup, skip scaffolding.
 
@@ -64,12 +68,13 @@ Keep the starter skills (`bootstrap-project`, `verify-change`, `security-review`
 
 ### 7. Assets and templates
 
-Copy only what you need from `assets/templates/` and the stack playbook. Typical additions:
+Copy only what you need from `assets/templates/`, `assets/recipes/`, and the stack playbook. Typical additions:
 
 - `.env.example` entries (names only)
 - GitHub PR / issue templates, CI workflows, EditorConfig
 - Docker / compose if they will containerize
 - Cloud `environment.json` fields from `assets/templates/env/`
+- Legal privacy/terms from `assets/templates/legal/` for public apps
 - Domain rule files (globbed) for the stack you just chose
 
 Do **not** install hooks from `assets/templates/hooks/` unless the user asked.

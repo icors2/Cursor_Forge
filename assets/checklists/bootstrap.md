@@ -5,7 +5,7 @@ Use with the `bootstrap-project` skill.
 ## Product
 
 - [ ] Purpose and name written in `.cursor/rules/memory.mdc`
-- [ ] Stack chosen (or explicitly "template only")
+- [ ] Stack chosen (or explicitly "template only"; golden-path only if no preference and confirmed)
 - [ ] Deploy target recorded (or local-only)
 - [ ] Threat model noted when auth/PII/payments/public API apply (`assets/reference/threat-model.md`)
 

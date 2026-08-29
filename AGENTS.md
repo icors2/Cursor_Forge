@@ -9,10 +9,10 @@ Read `.cursor/rules/memory.mdc` before you write application code.
 If working memory `Status` is `unbootstrapped` or `bootstrapping`:
 
 1. Follow the `bootstrap-project` skill (`.cursor/skills/bootstrap-project/SKILL.md`).
-2. Infer the product and stack from the user's request. Ask only for decisions you cannot infer.
+2. Infer the product and stack from the user's request. Ask only for decisions you cannot infer. Vague asks → `scope-feature` first.
 3. Enable **only** the MCP servers this project will use. Copy configs from `assets/mcp-catalog.md` into `.cursor/mcp.json`. Use `${env:NAME}` — never real secrets.
 4. Add project skills for multi-step workflows. Use `create-project-skill`.
-5. Copy or create assets the project actually needs from `assets/` (templates, checklists, playbooks).
+5. Copy or create assets the project actually needs from `assets/` (templates, checklists, playbooks, recipes).
 6. Run a lightweight threat model (`assets/reference/threat-model.md`) when the product handles auth, PII, payments, or public APIs.
 7. Persist what you learned with `update-working-memory`.
 8. Rewrite the **Project-specific** section below so later agents know how to run, test, and verify.
@@ -20,12 +20,16 @@ If working memory `Status` is `unbootstrapped` or `bootstrapping`:
 
 Do not scaffold a platform the user did not ask for. Ship one complete, usable slice.
 
-## After a change (always)
+## Vibe loop (build → live URL)
 
-1. Follow `verify-change` before claiming done. "It compiles" is not enough — state commands you ran.
-2. For auth, payments, secrets, PII, or public data access, follow `security-review` (or the `security-reviewer` subagent).
-3. Use `ship-change` when opening a PR or landing work.
-4. Gate on `assets/checklists/definition-of-done.md`.
+1. Vague ask → `scope-feature` (one demo moment).
+2. Build the slice; use `add-integration` + `assets/recipes/` for auth/DB/payments/AI/etc.
+3. Breaks → `debug-issue`. Panic → `checkpoint-rollback` (git does not undo DB/uploads).
+4. `verify-change` (smoke the critical path — compile alone is not enough).
+5. User-facing UI → `polish-ui` before a public URL.
+6. Security-sensitive → `security-review`.
+7. Live URL → `deploy-app`. PR → `ship-change`.
+8. Gate on `assets/checklists/definition-of-done.md`.
 
 ## Where knowledge lives
 
@@ -34,6 +38,7 @@ Do not scaffold a platform the user did not ask for. Ship one complete, usable s
 | Durable facts, decisions, conventions, lessons | `.cursor/rules/*.mdc` | Working memory. Commit it. |
 | Security non-negotiables | `.cursor/rules/20-security.mdc` | Always |
 | Multi-step workflows | `.cursor/skills/<name>/SKILL.md` | On demand / by relevance |
+| Feature recipes (auth, payments, …) | `assets/recipes/` | Via `add-integration` |
 | Shared tools | `.cursor/mcp.json` | Project MCP (no secrets) |
 | Catalogs, templates, playbooks, checklists | `assets/` | Read when needed |
 | How to run and test | this file | Always |
@@ -52,11 +57,13 @@ Cursor does not keep chat history as memory. **Rules are the memory.**
 ## Hard constraints
 
 - Never commit secrets. Never write tokens into rules, skills, `mcp.json`, or `assets/`.
+- Never call AI/payment providers from the client with a secret key (including test-mode secrets).
 - Project rules **must** be `.mdc`. A `.md` file in `.cursor/rules/` is ignored.
 - Skill `name` in frontmatter **must** match the parent folder.
 - User-level `~/.cursor/*` is **not** available to Cloud Agents. Keep everything this project needs in the repo.
 - Sandbox may block writes to `.cursor/*.json`. If you cannot edit `mcp.json`, tell the user what to paste.
 - Do not enable Cursor hooks from `assets/templates/hooks/` unless the user asked — they change every agent run.
+- Cost awareness: `assets/reference/cost-and-quotas.md`.
 
 ## Cursor Cloud specific instructions
 
@@ -77,3 +84,4 @@ Replace this section during bootstrap with:
 - Required environment variables (names only)
 - Enabled MCP servers and why
 - How to verify a change (browser, tests, or CLI)
+- Deploy URL and rollback (after first deploy)

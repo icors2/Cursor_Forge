@@ -6,13 +6,14 @@ Do not claim a change is done until the applicable boxes are checked.
 
 - [ ] Behavior matches the request (or documented intentional scope cut)
 - [ ] `verify-change` ran; commands and results are stated
+- [ ] **Smoke check** of the critical path ran (not only compile/typecheck)
 - [ ] No secrets introduced (`.env` untracked; `${env:NAME}` for MCP)
 - [ ] Working memory updated if a durable fact/decision/lesson changed
 - [ ] Lint/typecheck clean for touched languages (or N/A)
 
 ## When code changed
 
-- [ ] Tests added or updated for non-trivial logic
+- [ ] Tests added or updated for non-trivial logic (preferred; smoke still required)
 - [ ] Build succeeds if deploy/bundle is affected
 - [ ] User-visible UI checked in a browser (or explicitly deferred)
 

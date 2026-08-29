@@ -4,7 +4,8 @@ Pick one during `bootstrap-project` only if the user wants a product scaffolded 
 
 | File | When |
 | --- | --- |
-| `web-nextjs.md` | Browser UI / dashboard; default if they did not name a stack |
+| `golden-path.md` | **Opt-in** — user stated **no** stack preference (Next + Tailwind + shadcn + Postgres + Vercel) |
+| `web-nextjs.md` | They asked for Next.js / App Router specifically |
 | `web-vite.md` | They asked for Vite, or a static/toy/game UI |
 | `api-python.md` | HTTP API, Python implied or no UI |
 | `api-node.md` | HTTP API in Node/TypeScript |
@@ -13,4 +14,6 @@ Pick one during `bootstrap-project` only if the user wants a product scaffolded 
 
 Do not invent a monorepo. Do not add auth or a database unless the request needs it.
 
-Also read: `assets/reference/project-structure.md`, `api-contracts.md`, `observability.md`, `threat-model.md`.
+`golden-path.md` is **not** mandatory — if they named any stack, honor it.
+
+Also read: `assets/reference/project-structure.md`, `api-contracts.md`, `observability.md`, `threat-model.md`, `cost-and-quotas.md`, `ui-design.md`.

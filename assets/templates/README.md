@@ -14,3 +14,4 @@ Copy only what the project needs during bootstrap. Paths below are relative to `
 | `docker/` | Dockerfiles, `.dockerignore`, compose |
 | `env/` | Cloud `environment.json` examples |
 | `hooks/` | Optional Cursor hooks (not active until copied) |
+| `legal/` | Privacy policy and terms templates (not legal advice) |

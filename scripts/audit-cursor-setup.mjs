@@ -56,11 +56,23 @@ for (const rel of [
   ".cursor/skills/security-review/SKILL.md",
   ".cursor/skills/verify-change/SKILL.md",
   ".cursor/skills/ship-change/SKILL.md",
+  ".cursor/skills/scope-feature/SKILL.md",
+  ".cursor/skills/deploy-app/SKILL.md",
+  ".cursor/skills/debug-issue/SKILL.md",
+  ".cursor/skills/checkpoint-rollback/SKILL.md",
+  ".cursor/skills/add-integration/SKILL.md",
+  ".cursor/skills/migrate-database/SKILL.md",
+  ".cursor/skills/polish-ui/SKILL.md",
   ".cursor/agents/security-reviewer.md",
   "scripts/scan-secrets.mjs",
   "assets/checklists/security-review.md",
   "assets/checklists/definition-of-done.md",
+  "assets/checklists/ui-polish.md",
   "assets/reference/threat-model.md",
+  "assets/reference/cost-and-quotas.md",
+  "assets/reference/ui-design.md",
+  "assets/recipes/README.md",
+  "assets/stack-playbooks/golden-path.md",
 ]) {
   if (!existsSync(join(root, rel))) errors.push(`Missing ${rel}`);
 }

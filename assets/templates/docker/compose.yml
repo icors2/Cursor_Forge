@@ -10,7 +10,7 @@ services:
       - "${PORT:-3000}:${PORT:-3000}"
     environment:
       PORT: ${PORT:-3000}
-      # DATABASE_URL: ${DATABASE_URL}
+      # Add DATABASE_URL via env_file or platform secrets — do not commit values
     # env_file:
     #   - .env
     restart: unless-stopped

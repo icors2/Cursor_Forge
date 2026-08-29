@@ -10,3 +10,5 @@ alwaysApply: true
 - Authorize per request (and per resource), not only per route. Check tenancy when multi-tenant.
 - Do not log passwords, tokens, session IDs, or raw PII.
 - Before shipping auth, payments, or public data access, follow the `security-review` skill and `assets/checklists/security-review.md`.
+- Never call an AI or payment provider from the client with a secret or API secret key (including test-mode secrets) — proxy server-side. Only publishable/anon keys belong in the browser (see `assets/recipes/ai-feature.md` and `payments.md`).
+- Verify webhook signatures for payment and auth callbacks; never process unsigned bodies to "unblock" local testing.

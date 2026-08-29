@@ -1,6 +1,6 @@
 # Cursor project starter
 
-A blank repository that tells a Cursor agent how to stand up a new project: **MCP servers**, **skills**, **assets**, and **working memory** that survives across chats.
+A blank repository that tells a Cursor agent how to stand up a new project: **MCP servers**, **skills**, **assets**, and **working memory** that survives across chats — including the loop from vague idea to live URL.
 
 Cursor agents do not remember yesterday's thread. This repo treats **project rules** as memory, **skills** as runbooks, and **`assets/`** as the catalog the agent copies from.
 
@@ -20,7 +20,7 @@ In Cursor on Windows: **File → Clone Repository** and paste that URL.
 
    > Bootstrap this repo for a Next.js dashboard. We'll use GitHub, Linear, and Vercel. Keep working memory updated.
 
-4. The agent should follow `bootstrap-project` before it writes product code.
+4. The agent should follow `bootstrap-project` (and `scope-feature` for vague asks) before it writes product code.
 
 If you only want the Cursor layout and no app yet, say so. The starter is valid on its own.
 
@@ -30,12 +30,15 @@ If you only want the Cursor layout and no app yet, say so. The starter is valid 
 | --- | --- |
 | Read the current snapshot | `.cursor/rules/memory.mdc` |
 | First-run setup | `.cursor/skills/bootstrap-project/SKILL.md` |
+| Scope a vague ask | `.cursor/skills/scope-feature` |
 | Add tools | `.cursor/skills/add-mcp-server` + `assets/mcp-catalog.md` |
-| Add a workflow | `.cursor/skills/create-project-skill` |
-| Persist decisions and lessons | `.cursor/skills/update-working-memory` |
+| Add auth/DB/payments/AI/… | `.cursor/skills/add-integration` + `assets/recipes/` |
 | Prove a change works | `.cursor/skills/verify-change` |
-| Security review | `.cursor/skills/security-review` + `assets/checklists/security-review.md` |
+| Polish UI | `.cursor/skills/polish-ui` |
+| Security review | `.cursor/skills/security-review` |
+| Deploy live URL | `.cursor/skills/deploy-app` |
 | Ship / PR | `.cursor/skills/ship-change` |
+| Debug / rollback | `.cursor/skills/debug-issue`, `checkpoint-rollback` |
 | Check the layout + secrets | `npm run verify` |
 
 ## Layout
@@ -46,6 +49,7 @@ AGENTS.md                      Always-on agent brief
   00-core.mdc                  How this starter works
   10-memory-protocol.mdc       When to read/write memory
   20-security.mdc              Security non-negotiables
+  30-frontend.mdc              Globbed UI habits
   memory.mdc                   Living snapshot (always on)
   decisions.mdc                Architecture choices
   conventions.mdc              Habits
@@ -54,12 +58,13 @@ AGENTS.md                      Always-on agent brief
 .cursor/mcp.json               Project MCP (starts empty, no secrets)
 .cursor/agents/                Subagents (setup-verifier, security-reviewer)
 .cursor/environment.json       Cloud Agent install stub
-assets/                        Catalogs, templates, playbooks, checklists
+assets/
   mcp-catalog.md
   checklists/
-  reference/
-  stack-playbooks/
-  templates/                   github, ci, config, docker, env, hooks
+  reference/                   structure, API, UX, cost, threat model, …
+  recipes/                     auth, database, payments, AI, …
+  stack-playbooks/             including opt-in golden-path.md
+  templates/                   github, ci, config, docker, env, hooks, legal
 scripts/
   audit-cursor-setup.mjs
   scan-secrets.mjs
@@ -106,7 +111,7 @@ Runs the Cursor layout audit and a secret scan. Needs Node 18+. No install step.
 
 The agent should rewrite the **Project-specific** section of `AGENTS.md` with install, run, test, and verify steps for *your* app. This README stays about the starter; product docs go in `AGENTS.md` and, if useful, a new section you add here.
 
-Copy boilerplate from `assets/templates/` only as needed (GitHub templates, CI, Docker, hooks). Hooks stay **off** until you deliberately install them.
+Copy boilerplate from `assets/templates/` only as needed (GitHub templates, CI, Docker, legal, hooks). Hooks stay **off** until you deliberately install them.
 
 ## Cloud Agents
 

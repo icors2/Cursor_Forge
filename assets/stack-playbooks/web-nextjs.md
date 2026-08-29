@@ -1,6 +1,6 @@
 # Playbook: Next.js web app
 
-Use when the user wants a browser UI, dashboard, or app and did not name another stack.
+Use when the user asked for Next.js / App Router specifically. If they have **no** stack preference, prefer `golden-path.md` instead (adds Tailwind/shadcn/Postgres/Vercel opinions).
 
 ## Scaffold
 
