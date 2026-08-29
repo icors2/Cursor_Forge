@@ -6,7 +6,15 @@ Cursor agents do not remember yesterday's thread. This repo treats **project rul
 
 ## Use it
 
-1. Create a new repo from this template (or clone it).
+GitHub: https://github.com/icors2/Cursor_Forge
+
+```bash
+git clone https://github.com/icors2/Cursor_Forge.git
+```
+
+In Cursor on Windows: **File → Clone Repository** and paste that URL.
+
+1. Clone this repo (or use it as a GitHub template).
 2. Open the folder in Cursor.
 3. In Agent chat, say what you are building. Example:
 
