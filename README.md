@@ -33,7 +33,10 @@ If you only want the Cursor layout and no app yet, say so. The starter is valid 
 | Add tools | `.cursor/skills/add-mcp-server` + `assets/mcp-catalog.md` |
 | Add a workflow | `.cursor/skills/create-project-skill` |
 | Persist decisions and lessons | `.cursor/skills/update-working-memory` |
-| Check the layout | `node scripts/audit-cursor-setup.mjs` |
+| Prove a change works | `.cursor/skills/verify-change` |
+| Security review | `.cursor/skills/security-review` + `assets/checklists/security-review.md` |
+| Ship / PR | `.cursor/skills/ship-change` |
+| Check the layout + secrets | `npm run verify` |
 
 ## Layout
 
@@ -42,16 +45,24 @@ AGENTS.md                      Always-on agent brief
 .cursor/rules/                 Working memory (must be .mdc)
   00-core.mdc                  How this starter works
   10-memory-protocol.mdc       When to read/write memory
+  20-security.mdc              Security non-negotiables
   memory.mdc                   Living snapshot (always on)
   decisions.mdc                Architecture choices
   conventions.mdc              Habits
   lessons.mdc                  Failure modes
 .cursor/skills/                Runbooks the agent loads on demand
 .cursor/mcp.json               Project MCP (starts empty, no secrets)
-.cursor/agents/                Subagent for setup review
+.cursor/agents/                Subagents (setup-verifier, security-reviewer)
 .cursor/environment.json       Cloud Agent install stub
-assets/                        Catalogs, templates, stack playbooks
-scripts/audit-cursor-setup.mjs Layout checker
+assets/                        Catalogs, templates, playbooks, checklists
+  mcp-catalog.md
+  checklists/
+  reference/
+  stack-playbooks/
+  templates/                   github, ci, config, docker, env, hooks
+scripts/
+  audit-cursor-setup.mjs
+  scan-secrets.mjs
 .env.example                   Env var names only
 ```
 
@@ -63,6 +74,7 @@ Rules are injected into Agent context. That is the memory.
 - **`decisions.mdc`** — why you chose a stack or vendor.
 - **`conventions.mdc`** — habits, not a style guide.
 - **`lessons.mdc`** — mistake → signal → fix.
+- **`20-security.mdc`** — always-on security constraints.
 
 The agent is required to update these when it learns something that should still be true next week. Commit those edits.
 
@@ -78,19 +90,23 @@ You still need to:
 2. Reload MCP in Cursor Settings.
 3. For Cloud Agents, add HTTP MCP in the dashboard. Laptop `~/.cursor/mcp.json` does not apply there.
 
+On Windows, bare `"command": "npx"` often fails — see the platform note in `assets/mcp-catalog.md`.
+
 Never commit tokens.
 
 ## Local check
 
 ```bash
-node scripts/audit-cursor-setup.mjs
+npm run verify
 ```
 
-Needs Node 18+. No install step. A warning that status is `unbootstrapped` is expected until the first real project is set up.
+Runs the Cursor layout audit and a secret scan. Needs Node 18+. No install step. A warning that status is `unbootstrapped` is expected until the first real project is set up.
 
 ## After bootstrap
 
 The agent should rewrite the **Project-specific** section of `AGENTS.md` with install, run, test, and verify steps for *your* app. This README stays about the starter; product docs go in `AGENTS.md` and, if useful, a new section you add here.
+
+Copy boilerplate from `assets/templates/` only as needed (GitHub templates, CI, Docker, hooks). Hooks stay **off** until you deliberately install them.
 
 ## Cloud Agents
 

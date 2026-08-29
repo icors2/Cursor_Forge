@@ -15,5 +15,7 @@ Check:
 4. `.cursor/mcp.json` is valid JSON, no literal secrets, only servers the project needs.
 5. `AGENTS.md` Project-specific section is either still a placeholder (template-only) or has real run/test steps (active project).
 6. Working memory does not contradict `decisions.mdc` or `mcp.json`.
+7. `20-security.mdc` exists; `npm run verify` (audit + secret scan) is expected to be runnable.
+8. Hooks are not active unless the user asked (`assets/templates/hooks/` only).
 
 Return a short pass/fail list. Quote file paths. Do not suggest adding unused MCP servers.

@@ -7,6 +7,10 @@ Pick one during `bootstrap-project` only if the user wants a product scaffolded 
 | `web-nextjs.md` | Browser UI / dashboard; default if they did not name a stack |
 | `web-vite.md` | They asked for Vite, or a static/toy/game UI |
 | `api-python.md` | HTTP API, Python implied or no UI |
+| `api-node.md` | HTTP API in Node/TypeScript |
+| `worker-queue.md` | Background jobs / queues |
 | `cli.md` | Command-line tool or script |
 
 Do not invent a monorepo. Do not add auth or a database unless the request needs it.
+
+Also read: `assets/reference/project-structure.md`, `api-contracts.md`, `observability.md`, `threat-model.md`.

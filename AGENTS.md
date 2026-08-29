@@ -12,20 +12,30 @@ If working memory `Status` is `unbootstrapped` or `bootstrapping`:
 2. Infer the product and stack from the user's request. Ask only for decisions you cannot infer.
 3. Enable **only** the MCP servers this project will use. Copy configs from `assets/mcp-catalog.md` into `.cursor/mcp.json`. Use `${env:NAME}` — never real secrets.
 4. Add project skills for multi-step workflows. Use `create-project-skill`.
-5. Copy or create assets the project actually needs from `assets/`.
-6. Persist what you learned with `update-working-memory`.
-7. Rewrite the **Project-specific** section below so later agents know how to run, test, and verify.
+5. Copy or create assets the project actually needs from `assets/` (templates, checklists, playbooks).
+6. Run a lightweight threat model (`assets/reference/threat-model.md`) when the product handles auth, PII, payments, or public APIs.
+7. Persist what you learned with `update-working-memory`.
+8. Rewrite the **Project-specific** section below so later agents know how to run, test, and verify.
+9. Finish with `npm run verify` (audit + secret scan).
 
 Do not scaffold a platform the user did not ask for. Ship one complete, usable slice.
+
+## After a change (always)
+
+1. Follow `verify-change` before claiming done. "It compiles" is not enough — state commands you ran.
+2. For auth, payments, secrets, PII, or public data access, follow `security-review` (or the `security-reviewer` subagent).
+3. Use `ship-change` when opening a PR or landing work.
+4. Gate on `assets/checklists/definition-of-done.md`.
 
 ## Where knowledge lives
 
 | Kind | Put it here | Apply |
 | --- | --- | --- |
 | Durable facts, decisions, conventions, lessons | `.cursor/rules/*.mdc` | Working memory. Commit it. |
+| Security non-negotiables | `.cursor/rules/20-security.mdc` | Always |
 | Multi-step workflows | `.cursor/skills/<name>/SKILL.md` | On demand / by relevance |
 | Shared tools | `.cursor/mcp.json` | Project MCP (no secrets) |
-| Catalogs, templates, playbooks | `assets/` | Read when needed |
+| Catalogs, templates, playbooks, checklists | `assets/` | Read when needed |
 | How to run and test | this file | Always |
 
 Rules are short constraints. Skills are procedures. Do not dump a playbook into an always-apply rule.
@@ -46,6 +56,7 @@ Cursor does not keep chat history as memory. **Rules are the memory.**
 - Skill `name` in frontmatter **must** match the parent folder.
 - User-level `~/.cursor/*` is **not** available to Cloud Agents. Keep everything this project needs in the repo.
 - Sandbox may block writes to `.cursor/*.json`. If you cannot edit `mcp.json`, tell the user what to paste.
+- Do not enable Cursor hooks from `assets/templates/hooks/` unless the user asked — they change every agent run.
 
 ## Cursor Cloud specific instructions
 

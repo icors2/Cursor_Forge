@@ -7,6 +7,23 @@ alwaysApply: false
 
 Record choices that later agents should not silently reverse. Newest first.
 
+## 2026-08-29 — Agent starter hardening
+
+- **Decision:** Boilerplate (CI, GitHub templates, Docker, linters, hooks) stays under `assets/templates/` and is copied on demand — not materialized at repo root.
+- **Why:** Keeps the starter stack-agnostic; Cloud and local clones stay blank until bootstrap.
+- **Alternatives rejected:** Materializing CI/Docker at root; hybrid root+templates for every file.
+- **Revisit when:** The starter itself becomes a product app, or users consistently want default CI at clone time.
+
+- **Decision:** Security is both prose and tooling — `security-review` skill, `security-reviewer` subagent, `20-security.mdc`, checklists, `scripts/scan-secrets.mjs`, and a CI security-scan template.
+- **Why:** Agents need a planned review path and a mechanical gate; Cloud Agents cannot rely on user-level security skills.
+- **Alternatives rejected:** Checklist-only; tooling-only without a review runbook.
+- **Revisit when:** A preferred org-wide scanner replaces the local script.
+
+- **Decision:** Cursor hooks ship as inert templates under `assets/templates/hooks/` (Node `.mjs`), not enabled by default.
+- **Why:** Hooks change every agent run; a bad deny rule blocks work. Node scripts are portable to Windows and Linux Cloud Agents (`.sh` is not).
+- **Alternatives rejected:** Activating `.cursor/hooks.json` out of the box; shell-only hooks.
+- **Revisit when:** The user asks to enable project hooks.
+
 ## Template defaults (2026-08-29)
 
 - **Working memory lives in project rules**, not chat and not `~/.cursor`. Cloud Agents only see the repo.

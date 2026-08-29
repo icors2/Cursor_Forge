@@ -8,10 +8,12 @@ description: Validate Cursor rules, skills, MCP config, and working memory. Use 
 ## Run the checker
 
 ```bash
-node scripts/audit-cursor-setup.mjs
+npm run verify
 ```
 
-Fix every error it reports. Treat warnings as real unless you have a reason to keep them.
+This runs `scripts/audit-cursor-setup.mjs` then `scripts/scan-secrets.mjs`.
+
+Fix every error it reports. Treat warnings as real unless you have a reason to keep them. An `unbootstrapped` warning is expected for the blank starter.
 
 ## Manual checks the script cannot do
 

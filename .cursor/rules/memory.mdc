@@ -13,15 +13,16 @@ Agents update this file. It is the living snapshot of the project.
 
 ## Project
 
-- **Name:** (unset)
-- **Purpose:** Cursor IDE starter. Not yet a product.
-- **Stack:** (unset)
-- **Package manager:** (unset)
+- **Name:** Cursor_Forge (starter template)
+- **Purpose:** Cursor IDE starter for coding agents — MCP, skills, assets, working memory. Not yet a product app.
+- **Stack:** (unset — template only)
+- **Package manager:** npm (scripts only; no app deps)
 - **Deploy target:** (unset)
 
 ## Current focus
 
-- First-run bootstrap: identify the product, then add MCP, skills, and assets.
+- Starter hardening complete: security review, verify/ship loop, template catalog, MCP fixes, inert hooks templates.
+- First product bootstrap still pending: identify the product, then enable MCP and scaffold.
 
 ## Open questions
 
@@ -29,9 +30,9 @@ Agents update this file. It is the living snapshot of the project.
 
 ## Environment (names only)
 
-- Required env vars: (none yet)
+- Required env vars: (none yet — see `.env.example` for catalog names)
 - Enabled MCP servers: (none)
-- Project skills beyond the starter set: (none)
+- Project skills: bootstrap-project, add-mcp-server, create-project-skill, update-working-memory, audit-cursor-setup, security-review, verify-change, ship-change
 
 ## People and systems
 
@@ -42,4 +43,6 @@ Agents update this file. It is the living snapshot of the project.
 - Decisions: `.cursor/rules/decisions.mdc`
 - Conventions: `.cursor/rules/conventions.mdc`
 - Lessons: `.cursor/rules/lessons.mdc`
+- Security: `.cursor/rules/20-security.mdc` + `assets/checklists/security-review.md`
 - MCP catalog: `assets/mcp-catalog.md`
+- Verify: `npm run verify`

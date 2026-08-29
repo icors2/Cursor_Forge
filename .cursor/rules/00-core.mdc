@@ -13,6 +13,11 @@ This repository starts blank. Until `.cursor/rules/memory.mdc` says the project 
 3. Infer the product from the user request. Ask only what you cannot infer.
 4. Persist what you learned with the `update-working-memory` skill.
 
+## After implementing
+
+- Prove it: `verify-change`. Ship it: `ship-change`.
+- Security-sensitive work: `security-review` (see `20-security.mdc`).
+
 ## What lives where
 
 - Durable facts → `.cursor/rules/` (working memory)
@@ -28,3 +33,4 @@ This repository starts blank. Until `.cursor/rules/memory.mdc` says the project 
 - Keep always-apply rules short. Long playbooks belong in skills or `assets/`.
 - Project rules must be `.mdc`. Skill `name` must match its folder.
 - After changing rules, skills, or MCP, commit so later agents inherit the knowledge.
+- Do not activate `assets/templates/hooks/` unless the user asked.

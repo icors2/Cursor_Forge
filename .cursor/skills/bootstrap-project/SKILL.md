@@ -9,7 +9,7 @@ Do this before writing product code when `.cursor/rules/memory.mdc` says `unboot
 
 ## Goal
 
-Leave the repo ready for later agents: stack chosen (if needed), MCP enabled, skills and assets in place, working memory updated, `AGENTS.md` project-specific section rewritten.
+Leave the repo ready for later agents: stack chosen (if needed), MCP enabled, skills and assets in place, working memory updated, `AGENTS.md` project-specific section rewritten, `npm run verify` green.
 
 ## Steps
 
@@ -44,39 +44,47 @@ If this repo is still a template and they asked to build something:
 
 If they only wanted the Cursor setup, skip scaffolding.
 
-### 4. MCP servers
+### 4. Threat model (when relevant)
+
+If the product will handle auth, PII, payments, uploads, or public APIs, walk `assets/reference/threat-model.md` and record short answers in `decisions.mdc` (or note open risks). Skip for template-only or purely local toys unless the user asks.
+
+### 5. MCP servers
 
 1. Open `assets/mcp-catalog.md`.
-2. Pick servers this project will actually call.
+2. Pick servers this project will actually call. Respect the Windows `npx` note when on Windows.
 3. Follow the `add-mcp-server` skill for each.
 4. Tell the user which environment variables or Cloud Secrets to set. Never write values into the repo.
 5. If you cannot edit `.cursor/mcp.json` (sandbox), give them the exact JSON to paste.
 
-### 5. Skills
+### 6. Skills
 
 Create a project skill for each multi-step workflow you expect to repeat (deploy, migrate, release, design-to-code, …). Follow `create-project-skill`.
 
-Do not clone every starter skill. Keep the starter skills; add domain ones.
+Keep the starter skills (`bootstrap-project`, `verify-change`, `security-review`, `ship-change`, …). Add domain ones.
 
-### 6. Assets
+### 7. Assets and templates
 
-Copy only what you need out of `assets/templates/` and the stack playbook. Typical additions:
+Copy only what you need from `assets/templates/` and the stack playbook. Typical additions:
 
 - `.env.example` entries (names only)
-- PR / issue templates if they use GitHub
+- GitHub PR / issue templates, CI workflows, EditorConfig
+- Docker / compose if they will containerize
+- Cloud `environment.json` fields from `assets/templates/env/`
 - Domain rule files (globbed) for the stack you just chose
 
-Delete unused playbooks only if the user wants a lean repo. Default: leave the catalog; later projects from this template still need it.
+Do **not** install hooks from `assets/templates/hooks/` unless the user asked.
 
-### 7. Memory and instructions
+Leave the catalog in place unless the user wants a lean repo.
+
+### 8. Memory and instructions
 
 1. Follow `update-working-memory`.
 2. Set `Status` to `active`.
 3. Replace the **Project-specific** section in `AGENTS.md` with how to install, run, test, and verify.
 4. Add a decision entry if you chose a stack or deploy target.
-5. Run `node scripts/audit-cursor-setup.mjs` and fix what it reports.
+5. Run `npm run verify` and fix what it reports.
 
-### 8. Stop conditions
+### 9. Stop conditions
 
 You are done when:
 
@@ -84,5 +92,6 @@ You are done when:
 - `AGENTS.md` has real run/test instructions (or states that this is still a template-only repo)
 - MCP list in memory matches `.cursor/mcp.json`
 - The user knows which secrets to add and where
+- `npm run verify` passes (unbootstrapped warning is only OK before Status is `active`)
 
 Then continue with the original product request, if any.

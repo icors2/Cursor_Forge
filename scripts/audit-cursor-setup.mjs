@@ -39,7 +39,7 @@ function parseFrontmatter(text) {
 }
 
 const secretLike =
-  /(?:sk-[a-zA-Z0-9]{20,}|ghp_[a-zA-Z0-9]{20,}|xox[baprs]-[a-zA-Z0-9-]{20,}|AKIA[0-9A-Z]{16})/;
+  /(?:sk-(?:proj-|ant-)?[A-Za-z0-9_-]{20,}|sk_(?:live|test)_[A-Za-z0-9]{10,}|ghp_[a-zA-Z0-9]{20,}|gho_[a-zA-Z0-9]{20,}|ghs_[a-zA-Z0-9]{20,}|github_pat_[a-zA-Z0-9_]{20,}|npm_[A-Za-z0-9]{20,}|xox[baprs]-[a-zA-Z0-9-]{10,}|(?:AKIA|ASIA)[0-9A-Z]{16}|AIza[0-9A-Za-z\-_]{20,}|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----)/;
 
 // Required files
 for (const rel of [
@@ -48,10 +48,19 @@ for (const rel of [
   ".cursor/mcp.json",
   ".cursor/rules/00-core.mdc",
   ".cursor/rules/10-memory-protocol.mdc",
+  ".cursor/rules/20-security.mdc",
   ".cursor/rules/memory.mdc",
   ".cursor/rules/decisions.mdc",
   ".cursor/rules/conventions.mdc",
   ".cursor/rules/lessons.mdc",
+  ".cursor/skills/security-review/SKILL.md",
+  ".cursor/skills/verify-change/SKILL.md",
+  ".cursor/skills/ship-change/SKILL.md",
+  ".cursor/agents/security-reviewer.md",
+  "scripts/scan-secrets.mjs",
+  "assets/checklists/security-review.md",
+  "assets/checklists/definition-of-done.md",
+  "assets/reference/threat-model.md",
 ]) {
   if (!existsSync(join(root, rel))) errors.push(`Missing ${rel}`);
 }
@@ -140,6 +149,69 @@ if (existsSync(mcpPath)) {
         }
         if (server.envFile && !hasStdio) {
           warnings.push(`MCP server ${name}: envFile is stdio-only`);
+        }
+        if (
+          server.command === "npx" &&
+          process.platform === "win32"
+        ) {
+          warnings.push(
+            `MCP server ${name}: bare command "npx" often fails on Windows (use cmd /c npx)`,
+          );
+        }
+      }
+    }
+  }
+}
+
+// .env.example — names only (no KEY=value assignments with non-empty values)
+const envExample = join(root, ".env.example");
+if (existsSync(envExample)) {
+  const lines = read(envExample).split(/\r?\n/);
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line || line.startsWith("#")) continue;
+    const m = line.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/);
+    if (m && m[2].length > 0) {
+      errors.push(
+        `.env.example must list names only (found assigned value at line ${i + 1}: ${m[1]})`,
+      );
+    }
+  }
+}
+
+// Optional project hooks — validate shape if present
+const hooksPath = join(root, ".cursor/hooks.json");
+if (existsSync(hooksPath)) {
+  let hooks;
+  try {
+    hooks = JSON.parse(read(hooksPath));
+  } catch (err) {
+    errors.push(`hooks.json is not valid JSON: ${err.message}`);
+  }
+  if (hooks) {
+    if (hooks.version !== 1 && hooks.version !== "1") {
+      warnings.push("hooks.json: expected version 1");
+    }
+    if (!hooks.hooks || typeof hooks.hooks !== "object") {
+      errors.push("hooks.json must have a hooks object");
+    } else {
+      for (const [hookName, list] of Object.entries(hooks.hooks)) {
+        if (!Array.isArray(list)) {
+          errors.push(`hooks.json hooks.${hookName} must be an array`);
+          continue;
+        }
+        for (const entry of list) {
+          if (!entry || typeof entry !== "object") continue;
+          if (entry.command) {
+            const cmd = String(entry.command);
+            const scriptMatch = cmd.match(/(?:^|\s)(\.cursor\/hooks\/\S+\.mjs)/);
+            if (scriptMatch) {
+              const scriptRel = scriptMatch[1];
+              if (!existsSync(join(root, scriptRel))) {
+                errors.push(`hooks.json references missing script: ${scriptRel}`);
+              }
+            }
+          }
         }
       }
     }
