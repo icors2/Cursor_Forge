@@ -8,25 +8,29 @@ Agents update this file. It is the living snapshot of the project.
 
 ## Status
 
-- **Status:** unbootstrapped
-- **Updated:** 2026-08-29
+- **Status:** bootstrapping
+- **Updated:** 2026-09-19
 
 ## Project
 
-- **Name:** Cursor_Forge (starter template)
-- **Purpose:** Cursor IDE starter for coding agents — MCP, skills, assets, working memory, vibe loop (scope → build → verify → polish → deploy). Not yet a product app.
-- **Stack:** (unset — template only; opt-in golden path available)
-- **Package manager:** npm (scripts only; no app deps)
+- **Name:** Cursor_Forge (starter → first product)
+- **Purpose:** Cursor IDE starter for coding agents — MCP, skills, assets, working memory, vibe loop (scope → build → verify → polish → deploy). First product app not named yet.
+- **Stack:** (unset — will choose during bootstrap; golden path is opt-in only)
+- **Package manager:** npm (scripts only; no app deps yet)
 - **Deploy target:** (unset)
 
 ## Current focus
 
-- Vibe capability layer added: scope/deploy/debug/rollback, recipes, polish, guardrails, legal templates, opt-in golden path.
-- First product bootstrap still pending.
+- Branch `cursor/start-new-app-b09f` is the first-product workstream.
+- Repo oriented; waiting for product name, who it is for, stack (or "no preference"), deploy target, and external systems.
+- Do not scaffold until `scope-feature` (if vague) then `bootstrap-project`.
 
 ## Open questions
 
-- What is the user building?
+- What are we building, and who is it for?
+- Stack preference, or confirm golden path (Next + Tailwind + shadcn + Postgres + Vercel)?
+- Deploy target (local-only is fine)?
+- External systems (GitHub, Linear, Vercel, Stripe, Figma, Slack, a database, …)?
 
 ## Environment (names only)
 

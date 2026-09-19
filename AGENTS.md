@@ -74,7 +74,15 @@ Cursor does not keep chat history as memory. **Rules are the memory.**
 
 ## Project-specific
 
-_Status: not bootstrapped._
+_Status: bootstrapping on `cursor/start-new-app-b09f`. Product not named yet._
+
+Until the product is scoped:
+
+- This repo is still the Cursor starter (no app scaffold).
+- Install/run: none for an app. Starter check is `npm run verify` (Node 18+, no `npm install`).
+- Required env vars: none yet (catalog names live in `.env.example`).
+- Enabled MCP servers: none (`.cursor/mcp.json` is empty).
+- Next: name the product → `scope-feature` if vague → `bootstrap-project` → pick a stack playbook.
 
 Replace this section during bootstrap with:
 

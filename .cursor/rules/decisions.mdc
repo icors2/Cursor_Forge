@@ -7,6 +7,13 @@ alwaysApply: false
 
 Record choices that later agents should not silently reverse. Newest first.
 
+## 2026-09-19 — First product on a dedicated branch
+
+- **Decision:** First product bootstrap happens on `cursor/start-new-app-b09f`, leaving `main` as the blank starter until the app is real.
+- **Why:** User asked to familiarize, then start the app on a new branch. Product, stack, and deploy are still unknown.
+- **Alternatives rejected:** Scaffolding on `main` immediately; picking golden path without confirmation.
+- **Revisit when:** Product and stack are named.
+
 ## 2026-08-29 — Vibe coder capability layer
 
 - **Decision:** Golden path (`assets/stack-playbooks/golden-path.md`) is **opt-in** when the user has no stack preference — not an automatic default.
