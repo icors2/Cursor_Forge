@@ -70,26 +70,22 @@ Cursor does not keep chat history as memory. **Rules are the memory.**
 - User MCP, user skills, and user hooks do not apply here. Use repo files only.
 - `.cursor/environment.json` `install` must stay idempotent. Long-running processes belong in `start` / `terminals`.
 - Cloud MCP is configured in the Cursor dashboard as well as (optionally) `.cursor/mcp.json`. Prefer HTTP MCP. SSE and `mcp-remote` are not supported in Cloud Agents.
-- After bootstrap, put Cloud-only setup notes in this section.
+- Do not `docker compose up` from `install`. After scaffold, put Compose/dev servers in `start` / `terminals`.
+- Team/dashboard MCP still required for Cloud; laptop `~/.cursor/mcp.json` does not apply. Enabled project servers: context7 (HTTP), playwright (stdio in the VM).
+- If `npm` is missing on PATH, run scripts with the bundled Node under `~/.local/share/cursor-agent/versions/*/node`.
 
 ## Project-specific
 
-_Status: bootstrapping on `cursor/start-new-app-b09f`. Product not named yet._
-
-Until the product is scoped:
-
-- This repo is still the Cursor starter (no app scaffold).
-- Install/run: none for an app. Starter check is `npm run verify` (Node 18+, no `npm install`).
-- Required env vars: none yet (catalog names live in `.env.example`).
-- Enabled MCP servers: none (`.cursor/mcp.json` is empty).
-- Next: name the product → `scope-feature` if vague → `bootstrap-project` → pick a stack playbook.
-
-Replace this section during bootstrap with:
-
-- What this product is
-- Stack and package manager
-- How to install, run, test, and lint
-- Required environment variables (names only)
-- Enabled MCP servers and why
-- How to verify a change (browser, tests, or CLI)
-- Deploy URL and rollback (after first deploy)
+- **Product:** Volleyball Manager — club seasons, rosters, live stats, volunteering, announcements. Audience: ADMIN, COACH, PLAYER, PARENT.
+- **Stack:** Next.js App Router + Tailwind (`apps/web-client`), NestJS (`apps/api-server`), PostgreSQL + Prisma (`packages/database`), Socket.io, npm workspaces, Docker Compose. Spec: `Setup.md`, `system-prompt.md`, `docs/repo-plan.md`.
+- **Status:** Plan active; **app packages not scaffolded yet.** Next implementation step is `docs/first-slice.md` (coach records a live stat; parent board updates).
+- **Install:** none for an app yet. After scaffold: `npm install` at repo root (workspaces).
+- **Run (planned):** `docker compose up --build` — Postgres + API + web. Bind API to `0.0.0.0:$PORT`.
+- **Test / lint (planned):** workspace `npm test` / `npm run lint` per app. Not present until scaffold.
+- **Verify a UI change:** two browsers/tabs — coach tap → parent live board. Use Playwright MCP when available. Until scaffold: `npm run verify` (audit + secret scan) only.
+- **Env vars (names):** `DATABASE_URL`, `JWT_SECRET`, `NEXT_PUBLIC_API_URL`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`. Optional: `JWT_EXPIRES_IN`, `PORT` / `API_PORT`, `CONTEXT7_API_KEY`, `REDIS_URL` (later). Values in `.env` / Cloud Secrets — never git.
+- **MCP enabled:** `context7` (framework docs), `playwright` (browser smoke). Nothing else.
+- **Domain skill:** `add-domain-module` for later plugins. Do not implement volunteer, iCal, announcements, coach notes, or season archive in the first slice.
+- **Security:** auth + likely minor PII. Run `security-review` before shipping login or a public URL. `isDuesPaid` is ADMIN-only. Threat model in `decisions.mdc`.
+- **Deploy URL / rollback:** none yet. Local Compose is the deploy target until a host is named.
+- **Starter check:** `npm run verify` (or `node scripts/audit-cursor-setup.mjs` && `node scripts/scan-secrets.mjs`).

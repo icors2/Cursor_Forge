@@ -20,9 +20,19 @@ Add a bullet only after it is a real project habit. Do not paste a style guide.
 - **One UI library:** do not mix shadcn with a second component kit unless the user asks.
 - **Recipes over invention:** use `assets/recipes/` via `add-integration` for auth, DB, payments, AI, etc.
 
+## Volleyball Manager (from Setup.md)
+
+- Monorepo at repo root: `apps/web-client`, `apps/api-server`, `packages/database`, `packages/shared-types`. Do not nest under `/volleyball-manager`.
+- Features are isolated NestJS modules plus matching App Router pages. Use `add-domain-module`.
+- Every application file, function, and interface gets an explanatory comment (`system-prompt.md`).
+- Tailwind only for first-slice UI. Do not add shadcn or Storybook until asked. Defer `packages/ui-components`.
+- Auth is JWT + Nest guards, not Clerk/Auth.js, unless Setup.md is changed.
+- Shared types live in `packages/shared-types`; Prisma lives only in `packages/database`.
+- First slice stays `docs/first-slice.md` — no volunteer/iCal/announcements/notes/archive in the same change.
+
 ## After bootstrap
 
-- Replace or extend this section with conventions the agent actually observed or the user stated.
+- Extend this section only with habits the agent actually observed or the user stated.
 
 <!--
 - Example: API routes return `{ ok, data, error }` and never raw strings.

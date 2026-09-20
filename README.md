@@ -8,6 +8,17 @@ Cursor agents do not remember yesterday's thread. This repo treats **project rul
 
 GitHub: https://github.com/icors2/Cursor_Forge
 
+## Current product (this branch)
+
+**Volleyball Manager** — club volleyball seasons, rosters, and live game stats for admins, coaches, players, and parents.
+
+- Blueprint: `Setup.md`
+- Agent prompt: `system-prompt.md`
+- Repo plan: `docs/repo-plan.md`
+- First slice: `docs/first-slice.md` (coach records a live stat; parent board updates)
+
+App packages are **not scaffolded yet**. Later agents should implement the first slice, not the full platform.
+
 ```bash
 git clone https://github.com/icors2/Cursor_Forge.git
 ```
@@ -87,7 +98,7 @@ Keep always-apply rules short. Long procedures belong in skills.
 
 ## MCP
 
-`.cursor/mcp.json` starts as `{ "mcpServers": {} }`. The agent merges servers from `assets/mcp-catalog.md` using `${env:NAME}` for secrets.
+`.cursor/mcp.json` enables **context7** and **playwright** only (docs + browser verify). Secrets use `${env:NAME}`.
 
 You still need to:
 
@@ -105,7 +116,7 @@ Never commit tokens.
 npm run verify
 ```
 
-Runs the Cursor layout audit and a secret scan. Needs Node 18+. No install step. A warning that status is `unbootstrapped` is expected until the first real project is set up.
+Runs the Cursor layout audit and a secret scan. Needs Node 18+. No install step. Working memory Status is `active` (Volleyball Manager plan).
 
 ## After bootstrap
 

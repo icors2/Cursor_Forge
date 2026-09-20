@@ -8,47 +8,50 @@ Agents update this file. It is the living snapshot of the project.
 
 ## Status
 
-- **Status:** bootstrapping
-- **Updated:** 2026-09-19
+- **Status:** active
+- **Updated:** 2026-09-20
 
 ## Project
 
-- **Name:** Cursor_Forge (starter → first product)
-- **Purpose:** Cursor IDE starter for coding agents — MCP, skills, assets, working memory, vibe loop (scope → build → verify → polish → deploy). First product app not named yet.
-- **Stack:** (unset — will choose during bootstrap; golden path is opt-in only)
-- **Package manager:** npm (scripts only; no app deps yet)
-- **Deploy target:** (unset)
+- **Name:** Volleyball Manager (`volleyball-manager`)
+- **Purpose:** Club platform for admins, coaches, players, and parents — seasons, rosters, live game stats, volunteering, announcements, seasonal archives.
+- **Audience:** Youth/club volleyball programs (roles: ADMIN, COACH, PLAYER, PARENT).
+- **Stack:** Next.js App Router + Tailwind (`apps/web-client`); NestJS (`apps/api-server`); PostgreSQL + Prisma (`packages/database`); Socket.io; npm workspaces; Docker Compose. Not golden path / not Vercel-first.
+- **Package manager:** npm (workspaces; app packages not scaffolded yet)
+- **Deploy target:** Local Docker Compose first. Production host unset.
 
 ## Current focus
 
-- Branch `cursor/start-new-app-b09f` is the first-product workstream.
-- Repo oriented; waiting for product name, who it is for, stack (or "no preference"), deploy target, and external systems.
-- Do not scaffold until `scope-feature` (if vague) then `bootstrap-project`.
+- Branch `cursor/start-new-app-b09f`. Plan is written; **do not scaffold until implementing `docs/first-slice.md`**.
+- Demo moment: coach records a live stat; parent board updates over Socket.io.
+- Specs: `Setup.md`, `system-prompt.md`, `docs/repo-plan.md`.
 
 ## Open questions
 
-- What are we building, and who is it for?
-- Stack preference, or confirm golden path (Next + Tailwind + shadcn + Postgres + Vercel)?
-- Deploy target (local-only is fine)?
-- External systems (GitHub, Linear, Vercel, Stripe, Figma, Slack, a database, …)?
+- Production host (Render, Fly, VPS, …)?
+- Admin-provisioned users vs self-serve signup for v1?
+- Youth/minor PII consent (COPPA) before public launch?
+- Club branding / display name?
 
 ## Environment (names only)
 
-- Required env vars: (none yet — see `.env.example` for catalog names)
-- Enabled MCP servers: (none)
-- Project skills: bootstrap-project, add-mcp-server, create-project-skill, update-working-memory, audit-cursor-setup, security-review, verify-change, ship-change, scope-feature, deploy-app, debug-issue, checkpoint-rollback, add-integration, migrate-database, polish-ui
+- Required (once app exists): `DATABASE_URL`, `JWT_SECRET`, `NEXT_PUBLIC_API_URL`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`
+- Optional: `JWT_EXPIRES_IN`, `PORT` / `API_PORT`, `CONTEXT7_API_KEY`, `REDIS_URL` (later)
+- Enabled MCP servers: context7, playwright
+- Project skills: starter set plus `add-domain-module`
 
 ## People and systems
 
-- (none)
+- Repo: https://github.com/icors2/Cursor_Forge (owner icors2)
+- Local Postgres via Compose; no hosted DB or Stripe yet
 
 ## Pointers
 
+- Plan: `docs/repo-plan.md` · First slice: `docs/first-slice.md` · Checklist: `assets/checklists/first-slice.md`
 - Decisions: `.cursor/rules/decisions.mdc`
 - Conventions: `.cursor/rules/conventions.mdc`
 - Lessons: `.cursor/rules/lessons.mdc`
 - Security: `.cursor/rules/20-security.mdc` + `assets/checklists/security-review.md`
-- Recipes: `assets/recipes/`
+- Recipes: auth, database, realtime, seed-data
 - MCP catalog: `assets/mcp-catalog.md`
-- Cost: `assets/reference/cost-and-quotas.md`
-- Verify: `npm run verify`
+- Verify: `npm run verify` (bundled Node if `npm` missing)

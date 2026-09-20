@@ -7,6 +7,14 @@ alwaysApply: false
 
 Write the mistake, the signal, and the fix. Newest first.
 
+## 2026-09-20 — Setup.md guardrails (do not rediscover)
+
+- **Counter updates lose rapid taps.** Signal: two coach taps, one increment. Fix: insert timestamped `Stat` event rows; aggregate on read.
+- **Archived teams leak onto the dashboard.** Signal: last year’s roster on the active home. Fix: default Prisma `where` to the active season; historical only with `?historical=true&seasonId=`.
+- **Volunteer last-slot race.** Signal: capacity+1 registrations. Fix: transaction + row lock; HTTP 409.
+- **Parents set their own dues.** Signal: PATCH user includes `isDuesPaid: true`. Fix: dedicated ADMIN-only endpoint; strip the field from generic user updates.
+- **iCal timezone drift.** Signal: game time wrong in Google Calendar. Fix: store UTC; emit `YYYYMMDDThhmmssZ` with TZID when that module ships.
+
 ## 2026-08-29 — Starter hardening
 
 - **Bare `npx` in MCP on Windows fails.** Signal: `spawn npx ENOENT`. Fix: use `"command": "cmd", "args": ["/c", "npx", …]` on Windows; keep `"command": "npx"` on macOS/Linux/Cloud. Documented in `assets/mcp-catalog.md`.
