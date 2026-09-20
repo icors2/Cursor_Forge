@@ -36,7 +36,7 @@ Boundaries: browser → Nest (cookie/Bearer JWT) → Prisma/Postgres; Socket.io 
 Attackers: anonymous emit, PLAYER writing stats, isDuesPaid self-edit (no generic PATCH exists), archived-season leak, stolen JWT.
 ```
 
-- **Fixed / designed in:** event-insert stats; active-season default; JWT required on HTTP + socket; COACH/ADMIN-only POST /stats; class-validator allowlists; parameterized Prisma; explicit CORS; login failures logged without email; httpOnly SameSite=Lax cookie; login 20/min/IP throttle.
+- **Fixed / designed in:** event-insert stats; active-season default; JWT required on HTTP + socket; COACH/ADMIN-only POST /stats; class-validator allowlists; parameterized Prisma; explicit CORS; login failures logged without email; httpOnly SameSite=Lax cookie; login 80/min/IP throttle (raised so `npm run smoke` can exercise every module).
 - **Medium accepted:** no CSRF token (SameSite=Lax + credentialed API on another port); Next.js 14.2.25 still has an Image Optimizer advisory — `images.unoptimized` is on; no refresh-token denylist.
 - **Open:** COPPA/consent before public launch; rotate `JWT_SECRET` playbook; Compose/host TLS.
 - **Revisit when:** public URL or self-serve signup.

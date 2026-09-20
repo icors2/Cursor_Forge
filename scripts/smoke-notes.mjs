@@ -3,7 +3,7 @@
  * Smoke coach notes: COACH write, PARENT/PLAYER 403, note body not required on list.
  */
 
-import { expectStatus, IDS, json, login } from "./smoke-helpers.mjs";
+import { expectStatus, json, login } from "./smoke-helpers.mjs";
 
 /** Critical-path private notes. */
 async function main() {
@@ -18,17 +18,18 @@ async function main() {
   if (!Array.isArray(listed.data) || listed.data.length < 1) {
     throw new Error("coach should see the seeded note");
   }
+  const playerId = listed.data[0].playerId;
 
   const created = await json("/notes", {
     method: "POST",
     token: coach.token,
-    body: { playerId: IDS.player, content: "Serve receive improved on float serves." },
+    body: { playerId, content: "Serve receive improved on float serves." },
   });
-  if (!created.data.id || created.data.playerId !== IDS.player) {
+  if (!created.data.id || created.data.playerId !== playerId) {
     throw new Error("coach note create failed");
   }
 
-  const filtered = await json(`/notes?playerId=${IDS.player}`, { token: coach.token });
+  const filtered = await json(`/notes?playerId=${playerId}`, { token: coach.token });
   if (!filtered.data.some((row) => row.id === created.data.id)) {
     throw new Error("playerId filter missed the new note");
   }

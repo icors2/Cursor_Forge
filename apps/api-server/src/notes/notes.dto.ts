@@ -2,12 +2,12 @@
  * Coach-note HTTP DTOs. Content is required; playerId must be a user UUID.
  */
 
-import { IsString, IsUUID, MaxLength, MinLength } from "class-validator";
+import { IsString, Matches, MaxLength, MinLength } from "class-validator";
 
 /** POST /notes — COACH/ADMIN. coachId comes from the JWT. */
 export class CreateCoachNoteDto {
-  /** Player the note is about. */
-  @IsUUID()
+  /** Player the note is about. Accepts seed ids that are UUID-shaped but not RFC version 4. */
+  @Matches(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/)
   playerId!: string;
 
   /** Observation body. Never logged. */

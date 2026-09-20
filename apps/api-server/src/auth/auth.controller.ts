@@ -14,7 +14,7 @@ import type { RequestUser } from "./auth.types";
 /** Cookie max-age aligned with default JWT expiry (8h). */
 const COOKIE_MS = 8 * 60 * 60 * 1000;
 
-/** In-memory login throttle: 20 attempts / IP / minute. */
+/** In-memory login throttle: 80 attempts / IP / minute (full `npm run smoke` logs in many demo users). */
 const loginAttempts = new Map<string, { count: number; resetAt: number }>();
 
 /** Returns true when the caller should receive 429. */
@@ -26,7 +26,7 @@ function isLoginThrottled(ip: string): boolean {
     return false;
   }
   row.count += 1;
-  return row.count > 20;
+  return row.count > 80;
 }
 
 /** Sets the httpOnly access_token cookie used by the web client and Socket.io. */
