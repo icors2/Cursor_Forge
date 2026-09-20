@@ -14,6 +14,7 @@ const IDS = {
   admin: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
   coach: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
   parent: "cccccccc-cccc-cccc-cccc-cccccccccccc",
+  parent2: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
   player: "dddddddd-dddd-dddd-dddd-dddddddddddd",
   archivedSeason: "11111111-1111-4111-8111-111111111111",
   activeSeason: "22222222-2222-4222-8222-222222222222",
@@ -22,6 +23,9 @@ const IDS = {
   archivedGame: "55555555-5555-4555-8555-555555555555",
   activeGame: "66666666-6666-4666-8666-666666666666",
   roster: "77777777-7777-4777-8777-777777777777",
+  concessions: "88888888-8888-4888-8888-888888888888",
+  lineJudge: "99999999-9999-4999-8999-999999999999",
+  archivedConcessions: "aaaaaaa1-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
 } as const;
 
 /** Demo password for every seeded account (local/dev only). */
@@ -71,6 +75,20 @@ async function seed(): Promise<void> {
       role: Role.PARENT,
       firstName: "Sam",
       lastName: "Rivera",
+      isDuesPaid: true,
+    },
+  });
+
+  await prisma.user.upsert({
+    where: { email: "parent2@demo.local" },
+    update: { passwordHash, role: Role.PARENT, firstName: "Riley", lastName: "Chen" },
+    create: {
+      id: IDS.parent2,
+      email: "parent2@demo.local",
+      passwordHash,
+      role: Role.PARENT,
+      firstName: "Riley",
+      lastName: "Chen",
       isDuesPaid: true,
     },
   });
@@ -158,6 +176,63 @@ async function seed(): Promise<void> {
     },
   });
 
+  await prisma.volunteerSlot.upsert({
+    where: { id: IDS.concessions },
+    update: {
+      title: "Concessions",
+      startTime: new Date("2026-09-20T16:00:00.000Z"),
+      endTime: new Date("2026-09-20T19:00:00.000Z"),
+      capacity: 1,
+      seasonId: IDS.activeSeason,
+    },
+    create: {
+      id: IDS.concessions,
+      title: "Concessions",
+      startTime: new Date("2026-09-20T16:00:00.000Z"),
+      endTime: new Date("2026-09-20T19:00:00.000Z"),
+      capacity: 1,
+      seasonId: IDS.activeSeason,
+    },
+  });
+
+  await prisma.volunteerSlot.upsert({
+    where: { id: IDS.lineJudge },
+    update: {
+      title: "Line Judge",
+      startTime: new Date("2026-09-20T16:30:00.000Z"),
+      endTime: new Date("2026-09-20T18:30:00.000Z"),
+      capacity: 3,
+      seasonId: IDS.activeSeason,
+    },
+    create: {
+      id: IDS.lineJudge,
+      title: "Line Judge",
+      startTime: new Date("2026-09-20T16:30:00.000Z"),
+      endTime: new Date("2026-09-20T18:30:00.000Z"),
+      capacity: 3,
+      seasonId: IDS.activeSeason,
+    },
+  });
+
+  await prisma.volunteerSlot.upsert({
+    where: { id: IDS.archivedConcessions },
+    update: {
+      title: "Legacy Concessions",
+      startTime: new Date("2025-11-02T16:00:00.000Z"),
+      endTime: new Date("2025-11-02T19:00:00.000Z"),
+      capacity: 2,
+      seasonId: IDS.archivedSeason,
+    },
+    create: {
+      id: IDS.archivedConcessions,
+      title: "Legacy Concessions",
+      startTime: new Date("2025-11-02T16:00:00.000Z"),
+      endTime: new Date("2025-11-02T19:00:00.000Z"),
+      capacity: 2,
+      seasonId: IDS.archivedSeason,
+    },
+  });
+
   const existingDemoStat = await prisma.stat.findFirst({
     where: { gameId: IDS.activeGame, type: StatType.ACE },
   });
@@ -177,8 +252,10 @@ async function seed(): Promise<void> {
   console.log("  admin@demo.local / Demo1234!  (ADMIN)");
   console.log("  coach@demo.local / Demo1234!  (COACH)");
   console.log("  parent@demo.local / Demo1234! (PARENT)");
+  console.log("  parent2@demo.local / Demo1234! (PARENT)");
   console.log("  player@demo.local / Demo1234! (PLAYER)");
   console.log(`  active game id: ${IDS.activeGame}`);
+  console.log(`  concessions slot (cap 1): ${IDS.concessions}`);
 }
 
 seed()

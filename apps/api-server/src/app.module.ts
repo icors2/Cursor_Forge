@@ -9,10 +9,11 @@ import { GamesModule } from "./games/games.module";
 import { HealthController } from "./health.controller";
 import { PrismaModule } from "./prisma/prisma.module";
 import { StatsModule } from "./stats/stats.module";
+import { VolunteeringModule } from "./volunteering/volunteering.module";
 
 /** Application composition root. */
 @Module({
-  imports: [PrismaModule, CommonModule, AuthModule, GamesModule, StatsModule],
+  imports: [PrismaModule, CommonModule, AuthModule, GamesModule, StatsModule, VolunteeringModule],
   controllers: [HealthController],
 })
 export class AppModule {}

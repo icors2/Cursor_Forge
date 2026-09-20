@@ -21,7 +21,9 @@
     "db:migrate": "npm run migrate -w @volleyball-manager/database",
     "db:seed": "npm run seed -w @volleyball-manager/database",
     "db:setup": "npm run db:migrate && npm run db:seed",
-    "smoke": "node scripts/smoke-first-slice.mjs"
+    "smoke": "node scripts/smoke-first-slice.mjs && node scripts/smoke-volunteer.mjs",
+    "smoke:stats": "node scripts/smoke-first-slice.mjs",
+    "smoke:volunteer": "node scripts/smoke-volunteer.mjs"
   },
   "engines": {
     "node": ">=18"

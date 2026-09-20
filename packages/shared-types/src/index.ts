@@ -112,3 +112,45 @@ export interface RecordStatRequest {
   /** Event type allowlist. */
   type: StatType;
 }
+
+/** Volunteer shift shown on the signup board. */
+export interface VolunteerSlotView {
+  /** Slot id. */
+  id: string;
+  /** Shift label, e.g. Concessions. */
+  title: string;
+  /** UTC ISO-8601 start. */
+  startTime: string;
+  /** UTC ISO-8601 end. */
+  endTime: string;
+  /** Maximum registrations allowed. */
+  capacity: number;
+  /** Current registration count (read-side, not a stored counter). */
+  taken: number;
+  /** Owning season id. */
+  seasonId: string;
+  /** Whether the current user already signed up. */
+  registered: boolean;
+}
+
+/** ADMIN create-slot body. */
+export interface CreateVolunteerSlotRequest {
+  /** Shift label. */
+  title: string;
+  /** UTC ISO-8601 start. */
+  startTime: string;
+  /** UTC ISO-8601 end. */
+  endTime: string;
+  /** Maximum signups (>= 1). */
+  capacity: number;
+}
+
+/** Result of a successful parent registration. */
+export interface VolunteerRegistrationView {
+  /** Registration id. */
+  id: string;
+  /** Slot that was claimed. */
+  slotId: string;
+  /** Parent user id. */
+  userId: string;
+}

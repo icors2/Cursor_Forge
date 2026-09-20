@@ -1,5 +1,6 @@
-// First-slice Prisma schema for Volleyball Manager.
-// Models here match Setup.md core + roster/stats only (no notes/volunteer/announcements).
+// Prisma schema for Volleyball Manager.
+// First slice: users, seasons, teams, roster, games, stats.
+// Next module: volunteer slots + registrations (no notes/announcements/iCal).
 
 generator client {
   provider = "prisma-client-js"
@@ -12,14 +13,15 @@ datasource db {
 
 // Portal account. isDuesPaid is ADMIN-managed; no generic user update route in this slice.
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  passwordHash String
-  role         Role     @default(PLAYER)
-  firstName    String
-  lastName     String
-  isDuesPaid   Boolean  @default(false)
+  id            String                   @id @default(uuid())
+  email         String                   @unique
+  passwordHash  String
+  role          Role                     @default(PLAYER)
+  firstName     String
+  lastName      String
+  isDuesPaid    Boolean                  @default(false)
   rosterEntries Roster[]
+  volunteering  VolunteerRegistration[]
 }
 
 enum Role {
@@ -35,8 +37,9 @@ model Season {
   year     Int
   name     String
   isActive Boolean @default(true)
-  teams    Team[]
-  games    Game[]
+  teams          Team[]
+  games          Game[]
+  volunteerSlots VolunteerSlot[]
 }
 
 // Team belongs to one season. List queries default to the active season.
@@ -99,4 +102,30 @@ enum StatType {
   BLOCK
   DIG
   ERROR
+}
+
+// Volunteer shift. startTime/endTime are UTC. seasonId is additive so lists default to the active season.
+model VolunteerSlot {
+  id             String                   @id @default(uuid())
+  title          String
+  startTime      DateTime
+  endTime        DateTime
+  capacity       Int
+  seasonId       String
+  season         Season                   @relation(fields: [seasonId], references: [id])
+  registrations  VolunteerRegistration[]
+
+  @@index([seasonId])
+}
+
+// One signup per user per slot. Capacity is enforced in a transaction with FOR UPDATE, not a counter.
+model VolunteerRegistration {
+  id     String        @id @default(uuid())
+  userId String
+  slotId String
+  user   User          @relation(fields: [userId], references: [id])
+  slot   VolunteerSlot @relation(fields: [slotId], references: [id])
+
+  @@unique([userId, slotId])
+  @@index([slotId])
 }
