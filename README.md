@@ -17,7 +17,7 @@ GitHub: https://github.com/icors2/Cursor_Forge
 - Repo plan: `docs/repo-plan.md`
 - First slice: `docs/first-slice.md` (coach records a live stat; parent board updates)
 
-App packages are **not scaffolded yet**. Later agents should implement the first slice, not the full platform.
+First slice is implemented: login, coach stat pad, parent live board (`docs/first-slice.md`). Run `npm install`, copy `.env.example` → `.env`, `npm run db:setup`, then `npm run dev:api` and `npm run dev:web`.
 
 ```bash
 git clone https://github.com/icors2/Cursor_Forge.git

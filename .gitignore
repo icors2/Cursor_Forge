@@ -3,6 +3,10 @@
 .env.*
 !.env.example
 
+# Embedded / local Postgres data (not Docker)
+.local-pg/
+data/
+
 # Dependencies and build
 node_modules/
 dist/

@@ -51,3 +51,5 @@ A coach can record a volleyball stat during a live game and a parent (or spectat
 - Logged-out client cannot emit stats
 - PLAYER cannot write stats
 - Queries for the game/team do not leak a previous season’s rows
+
+Implemented on `cursor/start-new-app-b09f`. Prove with `npm run smoke`. UI is `apps/web-client` (`/` login, `/coach/game/[id]`, `/live/[id]`).

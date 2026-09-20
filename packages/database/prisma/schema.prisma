@@ -1,0 +1,102 @@
+// First-slice Prisma schema for Volleyball Manager.
+// Models here match Setup.md core + roster/stats only (no notes/volunteer/announcements).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Portal account. isDuesPaid is ADMIN-managed; no generic user update route in this slice.
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(PLAYER)
+  firstName    String
+  lastName     String
+  isDuesPaid   Boolean  @default(false)
+  rosterEntries Roster[]
+}
+
+enum Role {
+  ADMIN
+  COACH
+  PLAYER
+  PARENT
+}
+
+// A season owns teams and games. Exactly one row should have isActive=true (partial unique index).
+model Season {
+  id       String  @id @default(uuid())
+  year     Int
+  name     String
+  isActive Boolean @default(true)
+  teams    Team[]
+  games    Game[]
+}
+
+// Team belongs to one season. List queries default to the active season.
+model Team {
+  id       String  @id @default(uuid())
+  name     String
+  seasonId String
+  season   Season  @relation(fields: [seasonId], references: [id])
+  roster   Roster[]
+  games    Game[]  @relation("TeamGames")
+
+  @@index([seasonId])
+}
+
+// Player assignment on a team. Stats hang off this row, not the User directly.
+model Roster {
+  id        String @id @default(uuid())
+  userId    String
+  teamId    String
+  jerseyNum Int?
+  user      User   @relation(fields: [userId], references: [id])
+  team      Team   @relation(fields: [teamId], references: [id])
+  stats     Stat[]
+
+  @@unique([userId, teamId])
+}
+
+// Scheduled match. scheduledAt is stored in UTC.
+model Game {
+  id          String   @id @default(uuid())
+  teamId      String
+  opponent    String
+  scheduledAt DateTime
+  seasonId    String
+  team        Team     @relation("TeamGames", fields: [teamId], references: [id])
+  season      Season   @relation(fields: [seasonId], references: [id])
+  stats       Stat[]
+
+  @@index([seasonId])
+  @@index([teamId])
+}
+
+// Event-sourced stat. Insert a new row per tap — never UPDATE a counter.
+model Stat {
+  id        String   @id @default(uuid())
+  gameId    String
+  rosterId  String
+  type      StatType
+  timestamp DateTime @default(now())
+  game      Game     @relation(fields: [gameId], references: [id])
+  roster    Roster   @relation(fields: [rosterId], references: [id])
+
+  @@index([gameId])
+  @@index([rosterId])
+}
+
+enum StatType {
+  KILL
+  ACE
+  BLOCK
+  DIG
+  ERROR
+}

@@ -3,7 +3,7 @@
 Canonical product spec: `Setup.md`. Agent master prompt: `system-prompt.md`.
 First shippable slice: `docs/first-slice.md`.
 
-This is a **plan**. Do not scaffold `apps/` or `packages/` until the next implementation turn.
+First slice is **implemented** (`apps/`, `packages/`, `docker-compose.yml`). Later modules still follow `add-domain-module`.
 
 ## Product
 

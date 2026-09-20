@@ -7,6 +7,11 @@ alwaysApply: false
 
 Write the mistake, the signal, and the fix. Newest first.
 
+## 2026-09-20 — First-slice implementation
+
+- **`embedded-postgres` re-runs initdb on every start.** Signal: `directory exists but is not empty`. Fix: skip `initialise()` when `.local-pg/PG_VERSION` exists (`scripts/dev-postgres.mjs`).
+- **Prisma generate needs `DATABASE_URL` even when it does not connect.** Signal: schema env() error during `npm install`. Fix: `scripts/prisma-generate.mjs` supplies a dummy URL.
+
 ## 2026-09-20 — Setup.md guardrails (do not rediscover)
 
 - **Counter updates lose rapid taps.** Signal: two coach taps, one increment. Fix: insert timestamped `Stat` event rows; aggregate on read.

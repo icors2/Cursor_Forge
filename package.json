@@ -1,11 +1,35 @@
 {
-  "name": "cursor-project-starter",
+  "name": "volleyball-manager",
   "private": true,
   "type": "module",
-  "description": "Blank Cursor IDE repo with MCP, skills, assets, and working-memory rules",
+  "description": "Volleyball Manager — club seasons, rosters, and live game stats",
+  "workspaces": [
+    "apps/web-client",
+    "apps/api-server",
+    "packages/database",
+    "packages/shared-types"
+  ],
   "scripts": {
     "audit": "node scripts/audit-cursor-setup.mjs",
     "scan-secrets": "node scripts/scan-secrets.mjs",
-    "verify": "node scripts/audit-cursor-setup.mjs && node scripts/scan-secrets.mjs"
+    "verify": "node scripts/audit-cursor-setup.mjs && node scripts/scan-secrets.mjs",
+    "build": "npm run build -w @volleyball-manager/shared-types && npm run build -w @volleyball-manager/database && npm run build -w @volleyball-manager/api-server && npm run build -w @volleyball-manager/web-client",
+    "dev:api": "npm run start:dev -w @volleyball-manager/api-server",
+    "dev:web": "npm run dev -w @volleyball-manager/web-client",
+    "dev:pg": "node scripts/dev-postgres.mjs --keep",
+    "db:generate": "npm run generate -w @volleyball-manager/database",
+    "db:migrate": "npm run migrate -w @volleyball-manager/database",
+    "db:seed": "npm run seed -w @volleyball-manager/database",
+    "db:setup": "npm run db:migrate && npm run db:seed",
+    "smoke": "node scripts/smoke-first-slice.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "embedded-postgres": "^18.4.0-beta.17"
+  },
+  "dependencies": {
+    "socket.io-client": "^4.8.3"
   }
 }

@@ -7,6 +7,26 @@ alwaysApply: false
 
 Record choices that later agents should not silently reverse. Newest first.
 
+## 2026-09-20 — First-slice security review
+
+```text
+Data: emails, password hashes, names, roles, isDuesPaid, game stats (likely youth PII later).
+Boundaries: browser → Nest (cookie/Bearer JWT) → Prisma/Postgres; Socket.io handshake JWT; no public register.
+Attackers: anonymous emit, PLAYER writing stats, isDuesPaid self-edit (no generic PATCH exists), archived-season leak, stolen JWT.
+```
+
+- **Fixed / designed in:** event-insert stats; active-season default; JWT required on HTTP + socket; COACH/ADMIN-only POST /stats; class-validator allowlists; parameterized Prisma; explicit CORS; login failures logged without email; httpOnly SameSite=Lax cookie; login 20/min/IP throttle.
+- **Medium accepted:** no CSRF token (SameSite=Lax + credentialed API on another port); Next.js 14.2.25 still has an Image Optimizer advisory — `images.unoptimized` is on; no refresh-token denylist.
+- **Open:** COPPA/consent before public launch; rotate `JWT_SECRET` playbook; Compose/host TLS.
+- **Revisit when:** public URL or self-serve signup.
+
+## 2026-09-20 — Embedded Postgres for Cloud smoke
+
+- **Decision:** When Docker is missing, `scripts/dev-postgres.mjs` (`embedded-postgres`) serves local migrate/seed/smoke on port 5433. Compose remains the documented runtime.
+- **Why:** First slice must be smokeable in Cloud Agents that have no Docker daemon.
+- **Alternatives rejected:** SQLite (Setup.md requires Postgres); skipping smoke.
+- **Revisit when:** Docker is the only supported path.
+
 ## 2026-09-20 — Volleyball Manager from Setup.md
 
 - **Decision:** First product is **Volleyball Manager**. Stack is Next.js App Router + Tailwind, NestJS, PostgreSQL + Prisma, Socket.io, npm workspaces, Docker Compose. Repo root stays `Cursor_Forge`; layout is `apps/web-client`, `apps/api-server`, `packages/{database,shared-types,ui-components}`.

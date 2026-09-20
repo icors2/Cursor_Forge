@@ -29,6 +29,8 @@ Add a bullet only after it is a real project habit. Do not paste a style guide.
 - Auth is JWT + Nest guards, not Clerk/Auth.js, unless Setup.md is changed.
 - Shared types live in `packages/shared-types`; Prisma lives only in `packages/database`.
 - First slice stays `docs/first-slice.md` — no volunteer/iCal/announcements/notes/archive in the same change.
+- Local demo accounts live only in `packages/database/src/seed.ts` (`@demo.local` / `Demo1234!`). Never seed real PII.
+- API binds `0.0.0.0:$PORT`. Browser talks to `NEXT_PUBLIC_API_URL` (host-reachable), not a Docker-internal hostname.
 
 ## After bootstrap
 

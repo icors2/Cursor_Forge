@@ -76,16 +76,17 @@ Cursor does not keep chat history as memory. **Rules are the memory.**
 
 ## Project-specific
 
-- **Product:** Volleyball Manager — club seasons, rosters, live stats, volunteering, announcements. Audience: ADMIN, COACH, PLAYER, PARENT.
-- **Stack:** Next.js App Router + Tailwind (`apps/web-client`), NestJS (`apps/api-server`), PostgreSQL + Prisma (`packages/database`), Socket.io, npm workspaces, Docker Compose. Spec: `Setup.md`, `system-prompt.md`, `docs/repo-plan.md`.
-- **Status:** Plan active; **app packages not scaffolded yet.** Next implementation step is `docs/first-slice.md` (coach records a live stat; parent board updates).
-- **Install:** none for an app yet. After scaffold: `npm install` at repo root (workspaces).
-- **Run (planned):** `docker compose up --build` — Postgres + API + web. Bind API to `0.0.0.0:$PORT`.
-- **Test / lint (planned):** workspace `npm test` / `npm run lint` per app. Not present until scaffold.
-- **Verify a UI change:** two browsers/tabs — coach tap → parent live board. Use Playwright MCP when available. Until scaffold: `npm run verify` (audit + secret scan) only.
-- **Env vars (names):** `DATABASE_URL`, `JWT_SECRET`, `NEXT_PUBLIC_API_URL`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`. Optional: `JWT_EXPIRES_IN`, `PORT` / `API_PORT`, `CONTEXT7_API_KEY`, `REDIS_URL` (later). Values in `.env` / Cloud Secrets — never git.
-- **MCP enabled:** `context7` (framework docs), `playwright` (browser smoke). Nothing else.
-- **Domain skill:** `add-domain-module` for later plugins. Do not implement volunteer, iCal, announcements, coach notes, or season archive in the first slice.
-- **Security:** auth + likely minor PII. Run `security-review` before shipping login or a public URL. `isDuesPaid` is ADMIN-only. Threat model in `decisions.mdc`.
-- **Deploy URL / rollback:** none yet. Local Compose is the deploy target until a host is named.
-- **Starter check:** `npm run verify` (or `node scripts/audit-cursor-setup.mjs` && `node scripts/scan-secrets.mjs`).
+- **Product:** Volleyball Manager — club seasons, rosters, live stats. Audience: ADMIN, COACH, PLAYER, PARENT.
+- **Stack:** Next.js 14 App Router + Tailwind (`apps/web-client`), NestJS (`apps/api-server`), PostgreSQL + Prisma (`packages/database`), Socket.io, npm workspaces, Docker Compose.
+- **Install:** Node 18+ and npm. `npm install` at repo root. Copy `.env.example` to `.env` and fill values (never commit `.env`).
+- **Database:** `docker compose up postgres` **or** `npm run dev:pg` (embedded Postgres on 5433). Then `npm run db:setup` (migrate + seed).
+- **Run:** `npm run dev:api` (0.0.0.0:4010) and `npm run dev:web` (0.0.0.0:3010). Containers: `docker compose up --build`.
+- **Test / lint:** `npm run typecheck -w @volleyball-manager/api-server` and `-w @volleyball-manager/web-client`. Web `next build` typechecks pages.
+- **Verify a change:** `npm run smoke` — coach JWT records a Stat row; parent list + Socket.io `stat.created`; PLAYER 403; anonymous 401; archived season does not leak. UI: two tabs (coach pad + live board) when a browser is available.
+- **Demo seed (local only):** `coach@demo.local`, `parent@demo.local`, `player@demo.local`, `admin@demo.local` — password `Demo1234!`. Active game vs Riverside.
+- **Env vars (names):** `DATABASE_URL`, `JWT_SECRET`, `NEXT_PUBLIC_API_URL`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`. Optional: `JWT_EXPIRES_IN`, `PORT` / `API_PORT`, `WEB_ORIGIN`, `CONTEXT7_API_KEY`.
+- **MCP enabled:** `context7`, `playwright`.
+- **Domain skill:** `add-domain-module`. Do not add volunteer, iCal, announcements, coach notes, or archive UI unless asked.
+- **Security:** JWT httpOnly cookie + Bearer; `isDuesPaid` has no user update route. Threat model in `decisions.mdc`. Re-run `security-review` before a public URL.
+- **Deploy URL / rollback:** none yet.
+- **Starter check:** `npm run verify`.

@@ -14,17 +14,17 @@ Agents update this file. It is the living snapshot of the project.
 ## Project
 
 - **Name:** Volleyball Manager (`volleyball-manager`)
-- **Purpose:** Club platform for admins, coaches, players, and parents — seasons, rosters, live game stats, volunteering, announcements, seasonal archives.
-- **Audience:** Youth/club volleyball programs (roles: ADMIN, COACH, PLAYER, PARENT).
-- **Stack:** Next.js App Router + Tailwind (`apps/web-client`); NestJS (`apps/api-server`); PostgreSQL + Prisma (`packages/database`); Socket.io; npm workspaces; Docker Compose. Not golden path / not Vercel-first.
-- **Package manager:** npm (workspaces; app packages not scaffolded yet)
+- **Purpose:** Club platform for admins, coaches, players, and parents — seasons, rosters, live game stats.
+- **Audience:** Youth/club volleyball (ADMIN, COACH, PLAYER, PARENT).
+- **Stack:** Next.js 14 App Router + Tailwind (`apps/web-client`); NestJS (`apps/api-server`); PostgreSQL + Prisma (`packages/database`); Socket.io; npm workspaces; Docker Compose.
+- **Package manager:** npm workspaces (Node 18+)
 - **Deploy target:** Local Docker Compose first. Production host unset.
 
 ## Current focus
 
-- Branch `cursor/start-new-app-b09f`. Plan is written; **do not scaffold until implementing `docs/first-slice.md`**.
-- Demo moment: coach records a live stat; parent board updates over Socket.io.
-- Specs: `Setup.md`, `system-prompt.md`, `docs/repo-plan.md`.
+- First slice is **implemented** on `cursor/start-new-app-b09f`: JWT login, active-season games, event-sourced stats, Socket.io live board.
+- Demo: sign in as coach → open Fall 2026 game → tap a stat → parent board updates without reload.
+- Next modules (do not start until asked): volunteer, iCal, announcements, coach notes, season archive UI.
 
 ## Open questions
 
@@ -35,23 +35,20 @@ Agents update this file. It is the living snapshot of the project.
 
 ## Environment (names only)
 
-- Required (once app exists): `DATABASE_URL`, `JWT_SECRET`, `NEXT_PUBLIC_API_URL`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`
-- Optional: `JWT_EXPIRES_IN`, `PORT` / `API_PORT`, `CONTEXT7_API_KEY`, `REDIS_URL` (later)
+- Required: `DATABASE_URL`, `JWT_SECRET`, `NEXT_PUBLIC_API_URL`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`
+- Optional: `JWT_EXPIRES_IN`, `PORT` / `API_PORT`, `WEB_ORIGIN`, `CONTEXT7_API_KEY`, `REDIS_URL` (later)
 - Enabled MCP servers: context7, playwright
 - Project skills: starter set plus `add-domain-module`
 
 ## People and systems
 
-- Repo: https://github.com/icors2/Cursor_Forge (owner icors2)
-- Local Postgres via Compose; no hosted DB or Stripe yet
+- Repo: https://github.com/icors2/Cursor_Forge
+- Postgres: Docker Compose or `npm run dev:pg` (embedded, `.local-pg/`)
+- No hosted DB or Stripe
 
 ## Pointers
 
-- Plan: `docs/repo-plan.md` · First slice: `docs/first-slice.md` · Checklist: `assets/checklists/first-slice.md`
-- Decisions: `.cursor/rules/decisions.mdc`
-- Conventions: `.cursor/rules/conventions.mdc`
-- Lessons: `.cursor/rules/lessons.mdc`
-- Security: `.cursor/rules/20-security.mdc` + `assets/checklists/security-review.md`
-- Recipes: auth, database, realtime, seed-data
-- MCP catalog: `assets/mcp-catalog.md`
-- Verify: `npm run verify` (bundled Node if `npm` missing)
+- Plan: `docs/repo-plan.md` · Slice: `docs/first-slice.md` · Checklist: `assets/checklists/first-slice.md`
+- Seed users (local only): `packages/database/src/seed.ts`
+- Smoke: `npm run smoke` (API + Socket.io)
+- Verify starter: `npm run verify`
