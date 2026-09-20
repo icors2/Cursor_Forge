@@ -9,9 +9,9 @@ import { FormEvent, useState } from "react";
 import type { LoginResponse, PublicUser } from "@volleyball-manager/shared-types";
 import { api } from "@/lib/api";
 
-/** Sends coaches to the pad and everyone else to the live board. */
-function homeFor(user: PublicUser): string {
-  return user.role === "COACH" || user.role === "ADMIN" ? "/coach" : "/live";
+/** After login, everyone lands on the role-aware club home. */
+function homeFor(_user: PublicUser): string {
+  return "/home";
 }
 
 /** First-slice sign-in form. */
@@ -80,7 +80,8 @@ export default function LoginPage() {
         </button>
       </form>
       <p className="mt-6 text-xs leading-5 text-emerald-100/50">
-        Demo: coach@demo.local, parent@demo.local, player@demo.local, admin@demo.local — password Demo1234!
+        Demo: coach@demo.local, parent@demo.local, player@demo.local, admin@demo.local,
+        parent-unpaid@demo.local — password Demo1234!
       </p>
     </main>
   );

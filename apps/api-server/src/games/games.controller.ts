@@ -1,15 +1,18 @@
 /**
- * Authenticated game reads. Defaults to the active season.
+ * Authenticated game reads + COACH/ADMIN create. Defaults to the active season.
  */
 
-import { Controller, Get, Param, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from "@nestjs/common";
 import type { GameDetail, GameSummary } from "@volleyball-manager/shared-types";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { Roles } from "../auth/roles.decorator";
+import { RolesGuard } from "../auth/roles.guard";
+import { CreateGameDto } from "./games.dto";
 import { GamesService, type GameQuery } from "./games.service";
 
-/** GET /games and GET /games/:id */
+/** GET /games, POST /games, GET /games/:id */
 @Controller("games")
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class GamesController {
   constructor(private readonly games: GamesService) {}
 
@@ -17,6 +20,13 @@ export class GamesController {
   @Get()
   list(@Query() query: GameQuery): Promise<GameSummary[]> {
     return this.games.list(query);
+  }
+
+  /** COACH/ADMIN schedule a game on an active-season team. */
+  @Post()
+  @Roles("COACH", "ADMIN")
+  create(@Body() body: CreateGameDto): Promise<GameSummary> {
+    return this.games.create(body);
   }
 
   /** Game detail with roster and existing stat events. */

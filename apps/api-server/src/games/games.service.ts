@@ -2,10 +2,11 @@
  * Season-scoped game reads. Default is the active season unless historical is requested.
  */
 
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import type { GameDetail, GameSummary, RosterPlayer, StatEvent } from "@volleyball-manager/shared-types";
 import { ActiveSeasonService } from "../common/active-season.service";
 import { PrismaService } from "../prisma/prisma.service";
+import type { CreateGameDto } from "./games.dto";
 
 /** Query string for list/detail season scope. */
 export interface GameQuery {
@@ -42,6 +43,31 @@ export class GamesService {
     private readonly prisma: PrismaService,
     private readonly seasons: ActiveSeasonService,
   ) {}
+
+  /** Creates a game on an active-season team. scheduledAt is stored as UTC. */
+  async create(dto: CreateGameDto): Promise<GameSummary> {
+    const season = await this.seasons.getActiveSeason();
+    const kickoff = new Date(dto.scheduledAt);
+    if (Number.isNaN(kickoff.getTime())) {
+      throw new BadRequestException("scheduledAt must be a UTC instant");
+    }
+    const team = await this.prisma.team.findFirst({
+      where: { id: dto.teamId, seasonId: season.id },
+    });
+    if (!team) {
+      throw new NotFoundException("Team not found in the active season");
+    }
+    const created = await this.prisma.game.create({
+      data: {
+        teamId: team.id,
+        opponent: dto.opponent.trim(),
+        scheduledAt: kickoff,
+        seasonId: season.id,
+      },
+      include: { team: true, season: true },
+    });
+    return toSummary(created);
+  }
 
   /** Lists games for the resolved season (active by default). */
   async list(query: GameQuery): Promise<GameSummary[]> {

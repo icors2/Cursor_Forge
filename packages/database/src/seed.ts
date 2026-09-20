@@ -218,6 +218,23 @@ async function seed(): Promise<void> {
     },
   });
 
+  await prisma.game.upsert({
+    where: { id: IDS.activeGame2 },
+    update: {
+      teamId: IDS.activeTeam,
+      opponent: "Harbor",
+      scheduledAt: new Date("2026-09-27T18:00:00.000Z"),
+      seasonId: IDS.activeSeason,
+    },
+    create: {
+      id: IDS.activeGame2,
+      teamId: IDS.activeTeam,
+      opponent: "Harbor",
+      scheduledAt: new Date("2026-09-27T18:00:00.000Z"),
+      seasonId: IDS.activeSeason,
+    },
+  });
+
   await prisma.roster.upsert({
     where: { id: IDS.roster },
     update: { userId: IDS.player, teamId: IDS.activeTeam, jerseyNum: 7 },
@@ -226,6 +243,17 @@ async function seed(): Promise<void> {
       userId: IDS.player,
       teamId: IDS.activeTeam,
       jerseyNum: 7,
+    },
+  });
+
+  await prisma.roster.upsert({
+    where: { id: IDS.roster2 },
+    update: { userId: IDS.player2, teamId: IDS.activeTeam, jerseyNum: 12 },
+    create: {
+      id: IDS.roster2,
+      userId: IDS.player2,
+      teamId: IDS.activeTeam,
+      jerseyNum: 12,
     },
   });
 
@@ -286,6 +314,38 @@ async function seed(): Promise<void> {
     },
   });
 
+  await prisma.announcement.upsert({
+    where: { id: IDS.announcement },
+    update: {
+      title: "Practice moved to 6pm",
+      content: "Wednesday practice is 18:00 UTC at the main gym. Bring both jerseys.",
+      authorId: IDS.coach,
+      expiresAt: new Date("2026-12-31T23:59:59.000Z"),
+    },
+    create: {
+      id: IDS.announcement,
+      title: "Practice moved to 6pm",
+      content: "Wednesday practice is 18:00 UTC at the main gym. Bring both jerseys.",
+      authorId: IDS.coach,
+      expiresAt: new Date("2026-12-31T23:59:59.000Z"),
+    },
+  });
+
+  await prisma.coachNote.upsert({
+    where: { id: IDS.note },
+    update: {
+      playerId: IDS.player,
+      coachId: IDS.coach,
+      content: "Work the outside slide — timing is early on the second tempo.",
+    },
+    create: {
+      id: IDS.note,
+      playerId: IDS.player,
+      coachId: IDS.coach,
+      content: "Work the outside slide — timing is early on the second tempo.",
+    },
+  });
+
   const existingDemoStat = await prisma.stat.findFirst({
     where: { gameId: IDS.activeGame, type: StatType.ACE },
   });
@@ -306,8 +366,12 @@ async function seed(): Promise<void> {
   console.log("  coach@demo.local / Demo1234!  (COACH)");
   console.log("  parent@demo.local / Demo1234! (PARENT)");
   console.log("  parent2@demo.local / Demo1234! (PARENT)");
+  console.log("  parent-unpaid@demo.local / Demo1234! (PARENT, dues unpaid)");
   console.log("  player@demo.local / Demo1234! (PLAYER)");
+  console.log("  player2@demo.local / Demo1234! (PLAYER)");
+  console.log("  player-unpaid@demo.local / Demo1234! (PLAYER, dues unpaid)");
   console.log(`  active game id: ${IDS.activeGame}`);
+  console.log(`  team id: ${IDS.activeTeam}`);
   console.log(`  concessions slot (cap 1): ${IDS.concessions}`);
 }
 

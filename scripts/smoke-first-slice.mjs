@@ -69,13 +69,14 @@ async function main() {
   if (parent.user.role !== "PARENT") throw new Error("parent role mismatch");
 
   const games = await json("/games", { token: coach.token });
-  if (!Array.isArray(games) || games.length !== 1) {
-    throw new Error(`expected 1 active-season game, got ${JSON.stringify(games)}`);
+  if (!Array.isArray(games) || games.length < 1) {
+    throw new Error(`expected at least 1 active-season game, got ${JSON.stringify(games)}`);
   }
-  if (games[0].opponent === "Old Rivals") {
+  if (games.some((game) => game.opponent === "Old Rivals")) {
     throw new Error("archived season game leaked into default list");
   }
-  const gameId = games[0].id;
+  const riverside = games.find((game) => game.opponent === "Riverside") ?? games[0];
+  const gameId = riverside.id;
 
   const detail = await json(`/games/${gameId}`, { token: coach.token });
   const rosterId = detail.roster?.[0]?.id;

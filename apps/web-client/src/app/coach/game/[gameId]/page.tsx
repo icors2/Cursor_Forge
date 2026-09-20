@@ -25,17 +25,21 @@ export default function CoachGamePage() {
   const params = useParams<{ gameId: string }>();
   const gameId = params.gameId;
   const [game, setGame] = useState<GameDetail | null>(null);
+  const [selectedRosterId, setSelectedRosterId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [lastEvent, setLastEvent] = useState<StatEvent | null>(null);
 
   useEffect(() => {
     api<GameDetail>(`/games/${gameId}`)
-      .then(setGame)
+      .then((detail) => {
+        setGame(detail);
+        setSelectedRosterId((current) => current ?? detail.roster[0]?.id ?? null);
+      })
       .catch((err: unknown) => setError(err instanceof Error ? err.message : "Could not load game"));
   }, [gameId]);
 
-  const player = game?.roster[0];
+  const player = game?.roster.find((row) => row.id === selectedRosterId) ?? game?.roster[0];
 
   /** Inserts one event row via POST /stats (server broadcasts to the live board). */
   async function handleRecord(type: StatType): Promise<void> {
@@ -71,9 +75,24 @@ export default function CoachGamePage() {
       {player ? (
         <section className="rounded-2xl border border-emerald-900 bg-court-900/80 p-6">
           <p className="text-sm text-emerald-100/60">Rostered player</p>
-          <p className="text-2xl font-semibold">
-            #{player.jerseyNum ?? "—"} {player.firstName} {player.lastName}
-          </p>
+          {game && game.roster.length > 1 ? (
+            <select
+              className="mt-2 w-full rounded-lg border border-emerald-800 bg-court-950 px-3 py-2"
+              value={player.id}
+              onChange={(e) => setSelectedRosterId(e.target.value)}
+              aria-label="Player"
+            >
+              {game.roster.map((row) => (
+                <option key={row.id} value={row.id}>
+                  #{row.jerseyNum ?? "—"} {row.firstName} {row.lastName}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <p className="text-2xl font-semibold">
+              #{player.jerseyNum ?? "—"} {player.firstName} {player.lastName}
+            </p>
+          )}
           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
             {STAT_TYPES.map((type) => (
               <button

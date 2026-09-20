@@ -14,7 +14,7 @@ Agents update this file. It is the living snapshot of the project.
 ## Project
 
 - **Name:** Volleyball Manager (`volleyball-manager`)
-- **Purpose:** Club platform for admins, coaches, players, and parents — seasons, rosters, live game stats.
+- **Purpose:** Club platform for admins, coaches, players, and parents — seasons, rosters, live stats, volunteer, calendar, announcements, notes, dues.
 - **Audience:** Youth/club volleyball (ADMIN, COACH, PLAYER, PARENT).
 - **Stack:** Next.js 14 App Router + Tailwind (`apps/web-client`); NestJS (`apps/api-server`); PostgreSQL + Prisma (`packages/database`); Socket.io; npm workspaces; Docker Compose.
 - **Package manager:** npm workspaces (Node 18+)
@@ -22,15 +22,13 @@ Agents update this file. It is the living snapshot of the project.
 
 ## Current focus
 
-- First slice (live stats) and **volunteer + capacity lock** are implemented on `cursor/start-new-app-b09f`.
-- Volunteer: ADMIN creates slots; PARENT registers; transaction + `FOR UPDATE`; HTTP 409 when full or duplicate. Slots default to the active season.
-- Demo: parent signs up for Concessions (cap 1); second parent gets 409. UI at `/volunteer`.
-- Next modules (do not start until asked): iCal, announcements, coach notes, season archive UI.
+- Full local club stack is on `cursor/start-new-app-b09f` (PR #1). First slice (JWT, live stats, Socket.io) plus volunteer lock, iCal, announcements, coach notes, season archive, dues admin, teams/roster/game setup.
+- Demo: sign in → `/home` hub → each module has a UI route. Prove APIs with `npm run smoke`.
+- Not in v1: Stripe, Redis, Storybook, public self-serve signup, multi-club.
 
 ## Open questions
 
 - Production host (Render, Fly, VPS, …)?
-- Admin-provisioned users vs self-serve signup for v1?
 - Youth/minor PII consent (COPPA) before public launch?
 - Club branding / display name?
 
@@ -51,5 +49,5 @@ Agents update this file. It is the living snapshot of the project.
 
 - Plan: `docs/repo-plan.md` · Slice: `docs/first-slice.md` · Checklist: `assets/checklists/first-slice.md`
 - Seed users (local only): `packages/database/src/seed.ts`
-- Smoke: `npm run smoke` (stats + volunteer). Volunteer-only: `npm run smoke:volunteer`
+- Smoke: `npm run smoke` (stats, volunteer, iCal, announcements, notes, teams, dues, archive)
 - Verify starter: `npm run verify`

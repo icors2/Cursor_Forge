@@ -1,5 +1,5 @@
 /**
- * Isolated games read module (no writes in the first slice).
+ * Isolated games module (season-scoped reads + active-season create).
  */
 
 import { Module } from "@nestjs/common";

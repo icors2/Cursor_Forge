@@ -7,6 +7,12 @@ alwaysApply: false
 
 Write the mistake, the signal, and the fix. Newest first.
 
+## 2026-09-20 — Remaining modules
+
+- **iCal clients ignore floating times.** Signal: Google Calendar shifts kickoff. Fix: store UTC; emit `DTSTART:YYYYMMDDThhmmssZ` and `TZID:UTC`.
+- **archiveSeason leaves two active rows if seed only upserts Fall 2026.** Signal: unique index `Season_one_active` fails or queries mix seasons. Fix: seed `updateMany({ isActive: false })` then activate Fall 2026.
+- **Generic PATCH /users is a dues escalation hole.** Signal: parent body includes `isDuesPaid: true`. Fix: dedicated ADMIN `PATCH /users/:id/dues`; do not add a generic user update.
+
 ## 2026-09-20 — First-slice implementation
 
 - **`embedded-postgres` re-runs initdb on every start.** Signal: `directory exists but is not empty`. Fix: skip `initialise()` when `.local-pg/PG_VERSION` exists (`scripts/dev-postgres.mjs`).

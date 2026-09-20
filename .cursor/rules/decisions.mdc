@@ -7,6 +7,20 @@ alwaysApply: false
 
 Record choices that later agents should not silently reverse. Newest first.
 
+## 2026-09-20 — Remaining Setup.md modules in one local product
+
+- **Decision:** Ship iCal, announcements, coach notes, `archiveSeason`, ADMIN-only dues, plus team/roster/game-create so the club is demoable locally. Redis, Stripe, Storybook, and public signup stay out.
+- **Why:** User asked to build the whole remaining stack and test after. Setup.md names these modules; it does not require a payment processor or cached season id.
+- **Alternatives rejected:** Stopping after volunteer; adding Stripe for dues; Redis `activeSeasonId`; self-serve register.
+- **Revisit when:** A processor or production host is named.
+
+## 2026-09-20 — iCal feed is public (no JWT)
+
+- **Decision:** `GET /calendar/teams/:teamId/feed.ics` is unauthenticated so Google Calendar can subscribe. Times are UTC `YYYYMMDDThhmmssZ` with `TZID:UTC`.
+- **Why:** Calendar clients cannot send the httpOnly cookie. Team ids are UUIDs; the feed is schedule-only (no notes, dues, or emails).
+- **Alternatives rejected:** JWT-gated .ics (breaks subscribe); local TZID without Z.
+- **Revisit when:** the club wants signed/secret feed URLs.
+
 ## 2026-09-20 — Volunteer module (capacity lock)
 
 - **Decision:** Isolated `VolunteeringModule`. ADMIN creates slots; PARENT registers; other roles list only. Capacity is `SELECT … FOR UPDATE` + recount, then insert; HTTP 409 when full or unique `(userId, slotId)` conflicts. Additive `seasonId` on `VolunteerSlot` so lists default to the active season (Setup.md model had no season).

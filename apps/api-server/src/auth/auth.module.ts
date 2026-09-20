@@ -7,6 +7,7 @@ import { JwtModule } from "@nestjs/jwt";
 import { PassportModule } from "@nestjs/passport";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
+import { DuesPaidGuard } from "./dues-paid.guard";
 import { JwtStrategy } from "./jwt.strategy";
 
 /** Registers Passport + JWT signing. */
@@ -27,7 +28,7 @@ import { JwtStrategy } from "./jwt.strategy";
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
-  exports: [AuthService, JwtModule],
+  providers: [AuthService, JwtStrategy, DuesPaidGuard],
+  exports: [AuthService, JwtModule, DuesPaidGuard],
 })
 export class AuthModule {}

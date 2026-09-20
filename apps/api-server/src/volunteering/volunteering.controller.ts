@@ -6,6 +6,7 @@
 import { Body, Controller, Get, Param, Post, Query, UseGuards } from "@nestjs/common";
 import type { VolunteerRegistrationView, VolunteerSlotView } from "@volleyball-manager/shared-types";
 import { CurrentUser } from "../auth/current-user.decorator";
+import { DuesPaidGuard } from "../auth/dues-paid.guard";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { Roles } from "../auth/roles.decorator";
 import { RolesGuard } from "../auth/roles.guard";
@@ -39,6 +40,7 @@ export class VolunteeringController {
   /** PARENT claims one seat. Transaction + row lock; 409 when full or already signed up. */
   @Post("slots/:id/registrations")
   @Roles("PARENT")
+  @UseGuards(DuesPaidGuard)
   register(
     @Param("id") slotId: string,
     @CurrentUser() user: RequestUser,

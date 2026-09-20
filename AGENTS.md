@@ -76,17 +76,18 @@ Cursor does not keep chat history as memory. **Rules are the memory.**
 
 ## Project-specific
 
-- **Product:** Volleyball Manager — club seasons, rosters, live stats. Audience: ADMIN, COACH, PLAYER, PARENT.
+- **Product:** Volleyball Manager — club seasons, rosters, live stats, volunteer, calendar, announcements, coach notes, season archive, dues. Audience: ADMIN, COACH, PLAYER, PARENT.
 - **Stack:** Next.js 14 App Router + Tailwind (`apps/web-client`), NestJS (`apps/api-server`), PostgreSQL + Prisma (`packages/database`), Socket.io, npm workspaces, Docker Compose.
 - **Install:** Node 18+ and npm. `npm install` at repo root. Copy `.env.example` to `.env` and fill values (never commit `.env`).
 - **Database:** `docker compose up postgres` **or** `npm run dev:pg` (embedded Postgres on 5433). Then `npm run db:setup` (migrate + seed).
 - **Run:** `npm run dev:api` (0.0.0.0:4010) and `npm run dev:web` (0.0.0.0:3010). Containers: `docker compose up --build`.
 - **Test / lint:** `npm run typecheck -w @volleyball-manager/api-server` and `-w @volleyball-manager/web-client`. Web `next build` typechecks pages.
-- **Verify a change:** `npm run smoke` (stats + volunteer). Volunteer: list slots, PARENT signup, 409 on full/duplicate, PLAYER/COACH cannot register, ADMIN creates, archived slots stay hidden. UI: `/volunteer`.
-- **Demo seed (local only):** `coach@demo.local`, `parent@demo.local`, `parent2@demo.local`, `player@demo.local`, `admin@demo.local` — password `Demo1234!`. Concessions slot cap 1 (`88888888-8888-4888-8888-888888888888`).
+- **Verify a change:** `npm run smoke` — live stats + Socket.io; volunteer 409 lock; iCal UTC `YYYYMMDDThhmmssZ`; announcements; coach notes; teams/roster; ADMIN-only dues; `archiveSeason` then re-seed. Targeted: `npm run smoke:ical` / `smoke:notes` / etc.
+- **UI routes:** `/` login, `/home` hub, `/live`, `/coach`, `/volunteer`, `/calendar`, `/announcements`, `/notes`, `/teams`, `/seasons`, `/dues`.
+- **Demo seed (local only):** password `Demo1234!` — `admin@demo.local`, `coach@demo.local`, `parent@demo.local`, `parent2@demo.local`, `parent-unpaid@demo.local`, `player@demo.local`, `player2@demo.local`, `player-unpaid@demo.local`. Active season Fall 2026, team Forge United, games vs Riverside + Harbor.
 - **Env vars (names):** `DATABASE_URL`, `JWT_SECRET`, `NEXT_PUBLIC_API_URL`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`. Optional: `JWT_EXPIRES_IN`, `PORT` / `API_PORT`, `WEB_ORIGIN`, `CONTEXT7_API_KEY`.
 - **MCP enabled:** `context7`, `playwright`.
-- **Domain skill:** `add-domain-module`. Volunteer is in. Do not add iCal, announcements, coach notes, or archive UI unless asked.
-- **Security:** JWT httpOnly cookie + Bearer; `isDuesPaid` has no user update route. Threat model in `decisions.mdc`. Re-run `security-review` before a public URL.
+- **Domain skill:** `add-domain-module`.
+- **Security:** JWT httpOnly cookie + Bearer; `isDuesPaid` only via `PATCH /users/:id/dues` (ADMIN). iCal feed is public. Threat model in `decisions.mdc`. Re-run `security-review` before a public URL.
 - **Deploy URL / rollback:** none yet.
 - **Starter check:** `npm run verify`.
