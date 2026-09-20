@@ -4,6 +4,7 @@
 
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { ThemeRoot } from "@/components/ThemeRoot";
 import "./globals.css";
 
 /** Default browser tab metadata. */
@@ -16,7 +17,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body className="min-h-screen antialiased">{children}</body>
+      <body className="min-h-screen antialiased">
+        <ThemeRoot>{children}</ThemeRoot>
+      </body>
     </html>
   );
 }

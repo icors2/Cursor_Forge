@@ -7,6 +7,13 @@ alwaysApply: false
 
 Record choices that later agents should not silently reverse. Newest first.
 
+## 2026-09-20 — Per-account theme color (ADMIN)
+
+- **Decision:** Store `User.themeColor` (`#rrggbb`, default `#3dcf8e`). ADMIN writes it only at `PATCH /users/:id/theme`. The web client sets `--theme` / `--theme-strong` on `<html>` so Tailwind `court-400`/`court-600` recolor every module. No dark-mode overhaul.
+- **Why:** User asked for a simple per-account color wheel that is global across modules. A generic user PATCH would reopen the dues escalation hole.
+- **Alternatives rejected:** Club-wide single theme; self-serve theme editor; new design system.
+- **Revisit when:** the club wants a shared brand color instead of per-account accents.
+
 ## 2026-09-20 — Remaining Setup.md modules in one local product
 
 - **Decision:** Ship iCal, announcements, coach notes, `archiveSeason`, ADMIN-only dues, plus team/roster/game-create so the club is demoable locally. Redis, Stripe, Storybook, and public signup stay out.

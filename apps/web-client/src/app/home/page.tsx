@@ -28,6 +28,7 @@ function linksFor(role: PublicUser["role"]): HubLink[] {
     { href: "/announcements", title: "Announcements", body: "Club news from coaches." },
     { href: "/teams", title: "Teams", body: "Active-season roster." },
     { href: "/dues", title: "Dues", body: "See (or, as admin, set) the dues flag." },
+    { href: "/theme", title: "Theme", body: "Account accent color (admin edits; everyone sees their own)." },
   ];
   if (role === "PARENT" || role === "ADMIN") {
     common.push({ href: "/volunteer", title: "Volunteer", body: "Sign up for a shift or create slots." });

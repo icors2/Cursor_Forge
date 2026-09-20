@@ -4,7 +4,7 @@
 
 import { Injectable, Logger, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import type { PublicUser } from "@volleyball-manager/shared-types";
+import { DEFAULT_THEME_COLOR, type PublicUser } from "@volleyball-manager/shared-types";
 import bcrypt from "bcryptjs";
 import { PrismaService } from "../prisma/prisma.service";
 import type { JwtPayload } from "./auth.types";
@@ -53,6 +53,7 @@ export class AuthService {
     firstName: string;
     lastName: string;
     isDuesPaid: boolean;
+    themeColor?: string | null;
   }): PublicUser {
     return {
       id: user.id,
@@ -61,6 +62,7 @@ export class AuthService {
       firstName: user.firstName,
       lastName: user.lastName,
       isDuesPaid: user.isDuesPaid,
+      themeColor: user.themeColor || DEFAULT_THEME_COLOR,
     };
   }
 }

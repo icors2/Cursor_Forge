@@ -15,6 +15,9 @@ export const STAT_TYPES = ["KILL", "ACE", "BLOCK", "DIG", "ERROR"] as const;
 /** A single volleyball touch/result recorded as an event row. */
 export type StatType = (typeof STAT_TYPES)[number];
 
+/** Default accent when a user has no custom theme (court-400 brand green). */
+export const DEFAULT_THEME_COLOR = "#3dcf8e";
+
 /** Public user fields returned by login /me. Never includes passwordHash. */
 export interface PublicUser {
   /** Stable user id (uuid). */
@@ -29,6 +32,14 @@ export interface PublicUser {
   lastName: string;
   /** ADMIN-managed dues flag; included so the UI can show status, not edit it. */
   isDuesPaid: boolean;
+  /** ADMIN-assigned accent hex (#rrggbb) applied as CSS --theme for this account. */
+  themeColor: string;
+}
+
+/** PATCH /users/:id/theme — ADMIN only. Never accepted on a generic user update. */
+export interface UpdateThemeRequest {
+  /** Accent hex including the leading #. */
+  themeColor: string;
 }
 
 /** POST /auth/login body. */

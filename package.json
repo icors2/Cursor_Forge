@@ -21,7 +21,7 @@
     "db:migrate": "npm run migrate -w @volleyball-manager/database",
     "db:seed": "npm run seed -w @volleyball-manager/database",
     "db:setup": "npm run db:migrate && npm run db:seed",
-    "smoke": "node scripts/smoke-first-slice.mjs && node scripts/smoke-volunteer.mjs && node scripts/smoke-ical.mjs && node scripts/smoke-announcements.mjs && node scripts/smoke-notes.mjs && node scripts/smoke-teams.mjs && node scripts/smoke-dues.mjs && node scripts/smoke-archive.mjs",
+    "smoke": "node scripts/smoke-first-slice.mjs && node scripts/smoke-volunteer.mjs && node scripts/smoke-ical.mjs && node scripts/smoke-announcements.mjs && node scripts/smoke-notes.mjs && node scripts/smoke-teams.mjs && node scripts/smoke-dues.mjs && node scripts/smoke-theme.mjs && node scripts/smoke-archive.mjs",
     "smoke:stats": "node scripts/smoke-first-slice.mjs",
     "smoke:volunteer": "node scripts/smoke-volunteer.mjs",
     "smoke:ical": "node scripts/smoke-ical.mjs",
@@ -29,6 +29,7 @@
     "smoke:notes": "node scripts/smoke-notes.mjs",
     "smoke:teams": "node scripts/smoke-teams.mjs",
     "smoke:dues": "node scripts/smoke-dues.mjs",
+    "smoke:theme": "node scripts/smoke-theme.mjs",
     "smoke:archive": "node scripts/smoke-archive.mjs"
   },
   "engines": {

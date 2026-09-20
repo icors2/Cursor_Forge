@@ -22,8 +22,8 @@ Agents update this file. It is the living snapshot of the project.
 
 ## Current focus
 
-- Full local club stack is on `cursor/start-new-app-b09f` (PR #1). First slice (JWT, live stats, Socket.io) plus volunteer lock, iCal, announcements, coach notes, season archive, dues admin, teams/roster/game setup.
-- Demo: sign in → `/home` hub → each module has a UI route. Prove APIs with `npm run smoke`.
+- Full local club stack is on `cursor/start-new-app-b09f` (PR #1), including ADMIN per-account theme colors (`/theme`, `PATCH /users/:id/theme`).
+- Demo: sign in → `/home` hub → each module has a UI route. Admin vs coach accents differ (amber vs sky). Prove APIs with `npm run smoke`.
 - Not in v1: Stripe, Redis, Storybook, public self-serve signup, multi-club.
 
 ## Open questions
@@ -49,5 +49,5 @@ Agents update this file. It is the living snapshot of the project.
 
 - Plan: `docs/repo-plan.md` · Slice: `docs/first-slice.md` · Checklist: `assets/checklists/first-slice.md`
 - Seed users (local only): `packages/database/src/seed.ts`
-- Smoke: `npm run smoke` (stats, volunteer, iCal, announcements, notes, teams, dues, archive)
+- Smoke: `npm run smoke` (stats, volunteer, iCal, announcements, notes, teams, dues, theme, archive)
 - Verify starter: `npm run verify`

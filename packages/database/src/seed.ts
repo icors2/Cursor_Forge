@@ -47,7 +47,7 @@ async function seed(): Promise<void> {
 
   await prisma.user.upsert({
     where: { email: "admin@demo.local" },
-    update: { passwordHash, role: Role.ADMIN, firstName: "Casey", lastName: "Admin" },
+    update: { passwordHash, role: Role.ADMIN, firstName: "Casey", lastName: "Admin", themeColor: "#f59e0b" },
     create: {
       id: IDS.admin,
       email: "admin@demo.local",
@@ -56,12 +56,13 @@ async function seed(): Promise<void> {
       firstName: "Casey",
       lastName: "Admin",
       isDuesPaid: true,
+      themeColor: "#f59e0b",
     },
   });
 
   await prisma.user.upsert({
     where: { email: "coach@demo.local" },
-    update: { passwordHash, role: Role.COACH, firstName: "Jordan", lastName: "Blake" },
+    update: { passwordHash, role: Role.COACH, firstName: "Jordan", lastName: "Blake", themeColor: "#38bdf8" },
     create: {
       id: IDS.coach,
       email: "coach@demo.local",
@@ -70,12 +71,13 @@ async function seed(): Promise<void> {
       firstName: "Jordan",
       lastName: "Blake",
       isDuesPaid: true,
+      themeColor: "#38bdf8",
     },
   });
 
   await prisma.user.upsert({
     where: { email: "parent@demo.local" },
-    update: { passwordHash, role: Role.PARENT, firstName: "Sam", lastName: "Rivera" },
+    update: { passwordHash, role: Role.PARENT, firstName: "Sam", lastName: "Rivera", themeColor: "#3dcf8e" },
     create: {
       id: IDS.parent,
       email: "parent@demo.local",
@@ -84,6 +86,7 @@ async function seed(): Promise<void> {
       firstName: "Sam",
       lastName: "Rivera",
       isDuesPaid: true,
+      themeColor: "#3dcf8e",
     },
   });
 

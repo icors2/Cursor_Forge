@@ -1,8 +1,9 @@
 /**
- * User provision + dues DTOs. isDuesPaid is only on UpdateDuesDto — never on provision.
+ * User provision + dues + theme DTOs.
+ * isDuesPaid and themeColor each have their own DTO — never a generic user PATCH.
  */
 
-import { IsBoolean, IsEmail, IsIn, IsString, MaxLength, MinLength } from "class-validator";
+import { IsBoolean, IsEmail, IsIn, IsString, Matches, MaxLength, MinLength } from "class-validator";
 import { ROLES, type Role } from "@volleyball-manager/shared-types";
 
 /** POST /users — ADMIN provisions an account. isDuesPaid is always false here. */
@@ -40,4 +41,12 @@ export class UpdateDuesDto {
   /** New dues flag. */
   @IsBoolean()
   isDuesPaid!: boolean;
+}
+
+/** PATCH /users/:id/theme — ADMIN only dedicated endpoint. */
+export class UpdateThemeDto {
+  /** Accent hex (#rrggbb). Rejects shorthand and non-hex so CSS vars stay safe. */
+  @IsString()
+  @Matches(/^#[0-9a-fA-F]{6}$/)
+  themeColor!: string;
 }

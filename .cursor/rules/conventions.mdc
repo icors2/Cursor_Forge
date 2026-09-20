@@ -31,7 +31,8 @@ Add a bullet only after it is a real project habit. Do not paste a style guide.
 - Domain folders: `volunteering`, `calendar`, `announcements`, `notes`, `seasons`, `teams`, `users`.
 - Local demo accounts live only in `packages/database/src/seed.ts` (`@demo.local` / `Demo1234!`). Re-seed restores Fall 2026 as the only active season.
 - API binds `0.0.0.0:$PORT`. Browser talks to `NEXT_PUBLIC_API_URL` (host-reachable).
-- `isDuesPaid` is written only at `PATCH /users/:id/dues` (ADMIN). No generic `PATCH /users/:id`.
+- `isDuesPaid` is written only at `PATCH /users/:id/dues` (ADMIN). `themeColor` only at `PATCH /users/:id/theme` (ADMIN). No generic `PATCH /users/:id`.
+- Account accent is CSS `--theme` / `--theme-strong`; Tailwind `court-400` / `court-600` read those vars so every module inherits the color.
 - Team/Game/Stat/VolunteerSlot lists default to the active season; historical needs `?historical=true&seasonId=`.
 - Volunteer register: transaction + `FOR UPDATE`; HTTP 409 when full. ADMIN creates; PARENT registers.
 - iCal DATE-TIME is `YYYYMMDDThhmmssZ` with `TZID:UTC`.

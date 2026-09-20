@@ -10,7 +10,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Portal account. isDuesPaid is ADMIN-managed; no generic user update route in this slice.
+// Portal account. isDuesPaid and themeColor are ADMIN-managed on dedicated routes.
 model User {
   id            String                   @id @default(uuid())
   email         String                   @unique
@@ -19,6 +19,8 @@ model User {
   firstName     String
   lastName      String
   isDuesPaid    Boolean                  @default(false)
+  /// Accent hex (#rrggbb) applied as --theme after login. Default is the court-400 brand green.
+  themeColor    String                   @default("#3dcf8e")
   rosterEntries  Roster[]
   volunteering   VolunteerRegistration[]
   notesTargeted  CoachNote[]             @relation("PlayerNotes")

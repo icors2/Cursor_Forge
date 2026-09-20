@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import type { LoginResponse, PublicUser } from "@volleyball-manager/shared-types";
 import { api } from "@/lib/api";
+import { applyThemeColor } from "@/lib/theme";
 
 /** After login, everyone lands on the role-aware club home. */
 function homeFor(_user: PublicUser): string {
@@ -32,6 +33,7 @@ export default function LoginPage() {
         method: "POST",
         body: JSON.stringify({ email, password }),
       });
+      applyThemeColor(user.themeColor);
       router.push(homeFor(user));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sign-in failed");

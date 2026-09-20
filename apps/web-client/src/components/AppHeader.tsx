@@ -7,6 +7,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
+import { applyThemeColor, FALLBACK_THEME } from "@/lib/theme";
 
 /** Top bar for authenticated views. */
 export function AppHeader({ title }: { title: string }) {
@@ -15,6 +16,7 @@ export function AppHeader({ title }: { title: string }) {
   /** Clears the JWT cookie and returns to login. */
   async function handleSignOut(): Promise<void> {
     await api("/auth/logout", { method: "POST" }).catch(() => undefined);
+    applyThemeColor(FALLBACK_THEME);
     router.push("/");
   }
 
@@ -54,6 +56,9 @@ export function AppHeader({ title }: { title: string }) {
         </Link>
         <Link href="/dues" className="text-emerald-100/80 hover:text-court-400">
           Dues
+        </Link>
+        <Link href="/theme" className="text-emerald-100/80 hover:text-court-400">
+          Theme
         </Link>
         <button
           type="button"

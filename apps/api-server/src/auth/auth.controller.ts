@@ -4,7 +4,7 @@
 
 import { Body, Controller, Get, HttpException, HttpStatus, Post, Req, Res, UseGuards } from "@nestjs/common";
 import type { Request, Response } from "express";
-import type { LoginResponse, PublicUser } from "@volleyball-manager/shared-types";
+import { DEFAULT_THEME_COLOR, type LoginResponse, type PublicUser } from "@volleyball-manager/shared-types";
 import { AuthService } from "./auth.service";
 import { LoginDto } from "./auth.dto";
 import { CurrentUser } from "./current-user.decorator";
@@ -82,6 +82,7 @@ export class AuthController {
         firstName: "",
         lastName: "",
         isDuesPaid: false,
+        themeColor: DEFAULT_THEME_COLOR,
       };
     }
     return user;

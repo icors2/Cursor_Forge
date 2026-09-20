@@ -7,7 +7,7 @@ import type { PublicUser } from "@volleyball-manager/shared-types";
 import bcrypt from "bcryptjs";
 import { AuthService } from "../auth/auth.service";
 import { PrismaService } from "../prisma/prisma.service";
-import type { ProvisionUserDto, UpdateDuesDto } from "./users.dto";
+import type { ProvisionUserDto, UpdateDuesDto, UpdateThemeDto } from "./users.dto";
 
 /** Isolated users / dues domain service. */
 @Injectable()
@@ -63,6 +63,20 @@ export class UsersService {
       data: { isDuesPaid: dto.isDuesPaid },
     });
     this.logger.log(`dues_updated paid=${updated.isDuesPaid}`);
+    return this.auth.toPublic(updated);
+  }
+
+  /** Dedicated theme write. Stores lowercase #rrggbb; never accepts isDuesPaid. */
+  async updateTheme(id: string, dto: UpdateThemeDto): Promise<PublicUser> {
+    const existing = await this.prisma.user.findUnique({ where: { id } });
+    if (!existing) {
+      throw new NotFoundException("User not found");
+    }
+    const updated = await this.prisma.user.update({
+      where: { id },
+      data: { themeColor: dto.themeColor.toLowerCase() },
+    });
+    this.logger.log("theme_updated");
     return this.auth.toPublic(updated);
   }
 }
