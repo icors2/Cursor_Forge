@@ -16,7 +16,7 @@ COPY apps/api-server apps/api-server
 COPY packages/database packages/database
 COPY packages/shared-types packages/shared-types
 # prisma generate reads DATABASE_URL from the schema env() — dummy is fine at build.
-ENV DATABASE_URL=postgresql://build:build@127.0.0.1:5432/build
+ENV DATABASE_URL=dummy://prisma-generate-does-not-connect
 RUN npm run build -w @volleyball-manager/shared-types \
   && npm run generate -w @volleyball-manager/database \
   && npm run build -w @volleyball-manager/api-server

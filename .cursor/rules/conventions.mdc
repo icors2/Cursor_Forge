@@ -31,6 +31,7 @@ Add a bullet only after it is a real project habit. Do not paste a style guide.
 - First slice stays `docs/first-slice.md` — no volunteer/iCal/announcements/notes/archive in the same change.
 - Local demo accounts live only in `packages/database/src/seed.ts` (`@demo.local` / `Demo1234!`). Never seed real PII.
 - API binds `0.0.0.0:$PORT`. Browser talks to `NEXT_PUBLIC_API_URL` (host-reachable), not a Docker-internal hostname.
+- Volunteer register: transaction + `FOR UPDATE` on the slot row; HTTP 409 when full or already signed up. ADMIN creates; PARENT registers.
 
 ## After bootstrap
 

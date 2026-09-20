@@ -22,9 +22,10 @@ Agents update this file. It is the living snapshot of the project.
 
 ## Current focus
 
-- First slice is **implemented** on `cursor/start-new-app-b09f`: JWT login, active-season games, event-sourced stats, Socket.io live board.
-- Demo: sign in as coach → open Fall 2026 game → tap a stat → parent board updates without reload.
-- Next modules (do not start until asked): volunteer, iCal, announcements, coach notes, season archive UI.
+- First slice (live stats) and **volunteer + capacity lock** are implemented on `cursor/start-new-app-b09f`.
+- Volunteer: ADMIN creates slots; PARENT registers; transaction + `FOR UPDATE`; HTTP 409 when full or duplicate. Slots default to the active season.
+- Demo: parent signs up for Concessions (cap 1); second parent gets 409. UI at `/volunteer`.
+- Next modules (do not start until asked): iCal, announcements, coach notes, season archive UI.
 
 ## Open questions
 
@@ -50,5 +51,5 @@ Agents update this file. It is the living snapshot of the project.
 
 - Plan: `docs/repo-plan.md` · Slice: `docs/first-slice.md` · Checklist: `assets/checklists/first-slice.md`
 - Seed users (local only): `packages/database/src/seed.ts`
-- Smoke: `npm run smoke` (API + Socket.io)
+- Smoke: `npm run smoke` (stats + volunteer). Volunteer-only: `npm run smoke:volunteer`
 - Verify starter: `npm run verify`

@@ -11,7 +11,7 @@ import { fileURLToPath } from "node:url";
 const cwd = join(dirname(fileURLToPath(import.meta.url)), "../packages/database");
 const env = {
   ...process.env,
-  DATABASE_URL: process.env.DATABASE_URL ?? "postgresql://postgres:postgres@127.0.0.1:5432/postgres",
+  DATABASE_URL: process.env.DATABASE_URL ?? "dummy://prisma-generate-does-not-connect", // pragma: allowlist secret
 };
 
 const result = spawnSync("npx", ["prisma", "generate"], {

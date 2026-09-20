@@ -1,6 +1,5 @@
 // Prisma schema for Volleyball Manager.
-// First slice: users, seasons, teams, roster, games, stats.
-// Next module: volunteer slots + registrations (no notes/announcements/iCal).
+// Core + volunteer + coach notes + announcements. iCal is derived from Game.scheduledAt (UTC).
 
 generator client {
   provider = "prisma-client-js"
@@ -20,8 +19,11 @@ model User {
   firstName     String
   lastName      String
   isDuesPaid    Boolean                  @default(false)
-  rosterEntries Roster[]
-  volunteering  VolunteerRegistration[]
+  rosterEntries  Roster[]
+  volunteering   VolunteerRegistration[]
+  notesTargeted  CoachNote[]             @relation("PlayerNotes")
+  notesAuthored  CoachNote[]             @relation("AuthoredNotes")
+  announcements  Announcement[]
 }
 
 enum Role {
@@ -128,4 +130,31 @@ model VolunteerRegistration {
 
   @@unique([userId, slotId])
   @@index([slotId])
+}
+
+// Private coach observation about a rostered player. Not visible to PLAYER/PARENT.
+model CoachNote {
+  id        String   @id @default(uuid())
+  playerId  String
+  coachId   String
+  content   String
+  createdAt DateTime @default(now())
+  player    User     @relation("PlayerNotes", fields: [playerId], references: [id])
+  coach     User     @relation("AuthoredNotes", fields: [coachId], references: [id])
+
+  @@index([playerId])
+  @@index([coachId])
+}
+
+// Club-wide announcement. Expired rows stay stored; list endpoints hide them.
+model Announcement {
+  id        String    @id @default(uuid())
+  title     String
+  content   String
+  authorId  String
+  createdAt DateTime  @default(now())
+  expiresAt DateTime?
+  author    User      @relation(fields: [authorId], references: [id])
+
+  @@index([authorId])
 }

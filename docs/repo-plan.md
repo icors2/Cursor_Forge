@@ -117,9 +117,10 @@ See `decisions.mdc` (2026-09-20). Short form:
 
 ## Implementation order (after this plan)
 
-1. Scaffold npm workspaces + Docker Compose + Prisma schema from `Setup.md`.
-2. Ship **first slice** (`docs/first-slice.md`) — live stat demo moment.
-3. Later modules (each via `add-domain-module`): volunteer + lock, iCal UTC, announcements, coach notes, season archive, dues admin UI.
+1. Scaffold npm workspaces + Docker Compose + Prisma schema from `Setup.md`. **Done.**
+2. Ship **first slice** (`docs/first-slice.md`) — live stat demo moment. **Done.**
+3. Volunteer + capacity lock. **Done** (`/volunteer`, `POST /volunteer/slots/:id/registrations`).
+4. Later modules (each via `add-domain-module`): iCal UTC, announcements, coach notes, season archive, dues admin UI.
 
 ## Guardrails (never skip)
 

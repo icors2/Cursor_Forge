@@ -82,11 +82,11 @@ Cursor does not keep chat history as memory. **Rules are the memory.**
 - **Database:** `docker compose up postgres` **or** `npm run dev:pg` (embedded Postgres on 5433). Then `npm run db:setup` (migrate + seed).
 - **Run:** `npm run dev:api` (0.0.0.0:4010) and `npm run dev:web` (0.0.0.0:3010). Containers: `docker compose up --build`.
 - **Test / lint:** `npm run typecheck -w @volleyball-manager/api-server` and `-w @volleyball-manager/web-client`. Web `next build` typechecks pages.
-- **Verify a change:** `npm run smoke` — coach JWT records a Stat row; parent list + Socket.io `stat.created`; PLAYER 403; anonymous 401; archived season does not leak. UI: two tabs (coach pad + live board) when a browser is available.
-- **Demo seed (local only):** `coach@demo.local`, `parent@demo.local`, `player@demo.local`, `admin@demo.local` — password `Demo1234!`. Active game vs Riverside.
+- **Verify a change:** `npm run smoke` (stats + volunteer). Volunteer: list slots, PARENT signup, 409 on full/duplicate, PLAYER/COACH cannot register, ADMIN creates, archived slots stay hidden. UI: `/volunteer`.
+- **Demo seed (local only):** `coach@demo.local`, `parent@demo.local`, `parent2@demo.local`, `player@demo.local`, `admin@demo.local` — password `Demo1234!`. Concessions slot cap 1 (`88888888-8888-4888-8888-888888888888`).
 - **Env vars (names):** `DATABASE_URL`, `JWT_SECRET`, `NEXT_PUBLIC_API_URL`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`. Optional: `JWT_EXPIRES_IN`, `PORT` / `API_PORT`, `WEB_ORIGIN`, `CONTEXT7_API_KEY`.
 - **MCP enabled:** `context7`, `playwright`.
-- **Domain skill:** `add-domain-module`. Do not add volunteer, iCal, announcements, coach notes, or archive UI unless asked.
+- **Domain skill:** `add-domain-module`. Volunteer is in. Do not add iCal, announcements, coach notes, or archive UI unless asked.
 - **Security:** JWT httpOnly cookie + Bearer; `isDuesPaid` has no user update route. Threat model in `decisions.mdc`. Re-run `security-review` before a public URL.
 - **Deploy URL / rollback:** none yet.
 - **Starter check:** `npm run verify`.

@@ -1,5 +1,5 @@
 /**
- * Idempotent local seed for the live-stat first slice.
+ * Idempotent local seed for the full club demo (stats, volunteer, calendar, notes, announcements, dues).
  * Demo passwords are intentional and documented — never use them in production.
  */
 
@@ -15,24 +15,32 @@ const IDS = {
   coach: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
   parent: "cccccccc-cccc-cccc-cccc-cccccccccccc",
   parent2: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+  parentUnpaid: "10101010-1010-4101-8101-101010101010",
   player: "dddddddd-dddd-dddd-dddd-dddddddddddd",
+  player2: "f1f1f1f1-f1f1-41f1-81f1-f1f1f1f1f1f1",
+  playerUnpaid: "20202020-2020-4202-8202-202020202020",
   archivedSeason: "11111111-1111-4111-8111-111111111111",
   activeSeason: "22222222-2222-4222-8222-222222222222",
   archivedTeam: "33333333-3333-4333-8333-333333333333",
   activeTeam: "44444444-4444-4444-8444-444444444444",
   archivedGame: "55555555-5555-4555-8555-555555555555",
   activeGame: "66666666-6666-4666-8666-666666666666",
+  activeGame2: "61616161-6161-4616-8616-616161616161",
   roster: "77777777-7777-4777-8777-777777777777",
+  roster2: "78787878-7878-4787-8787-787878787878",
   concessions: "88888888-8888-4888-8888-888888888888",
   lineJudge: "99999999-9999-4999-8999-999999999999",
   archivedConcessions: "aaaaaaa1-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+  announcement: "b1b1b1b1-b1b1-41b1-81b1-b1b1b1b1b1b1",
+  note: "c1c1c1c1-c1c1-41c1-81c1-c1c1c1c1c1c1",
 } as const;
 
 /** Demo password for every seeded account (local/dev only). */
 const DEMO_PASSWORD = "Demo1234!";
 
 /**
- * Upserts users, two seasons (one archived), teams, games, and one roster row.
+ * Upserts users, seasons, teams, games, roster, volunteer slots, notes, and announcements.
+ * Re-running seed restores Fall 2026 as the only active season (archive smoke relies on this).
  */
 async function seed(): Promise<void> {
   const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 10);
@@ -95,7 +103,7 @@ async function seed(): Promise<void> {
 
   await prisma.user.upsert({
     where: { email: "player@demo.local" },
-    update: { passwordHash, role: Role.PLAYER, firstName: "Alex", lastName: "Rivera" },
+    update: { passwordHash, role: Role.PLAYER, firstName: "Alex", lastName: "Rivera", isDuesPaid: true },
     create: {
       id: IDS.player,
       email: "player@demo.local",
@@ -106,6 +114,51 @@ async function seed(): Promise<void> {
       isDuesPaid: true,
     },
   });
+
+  await prisma.user.upsert({
+    where: { email: "player2@demo.local" },
+    update: { passwordHash, role: Role.PLAYER, firstName: "Morgan", lastName: "Lee", isDuesPaid: true },
+    create: {
+      id: IDS.player2,
+      email: "player2@demo.local",
+      passwordHash,
+      role: Role.PLAYER,
+      firstName: "Morgan",
+      lastName: "Lee",
+      isDuesPaid: true,
+    },
+  });
+
+  await prisma.user.upsert({
+    where: { email: "parent-unpaid@demo.local" },
+    update: { passwordHash, role: Role.PARENT, firstName: "Jamie", lastName: "Cole", isDuesPaid: false },
+    create: {
+      id: IDS.parentUnpaid,
+      email: "parent-unpaid@demo.local",
+      passwordHash,
+      role: Role.PARENT,
+      firstName: "Jamie",
+      lastName: "Cole",
+      isDuesPaid: false,
+    },
+  });
+
+  await prisma.user.upsert({
+    where: { email: "player-unpaid@demo.local" },
+    update: { passwordHash, role: Role.PLAYER, firstName: "Taylor", lastName: "Ng", isDuesPaid: false },
+    create: {
+      id: IDS.playerUnpaid,
+      email: "player-unpaid@demo.local",
+      passwordHash,
+      role: Role.PLAYER,
+      firstName: "Taylor",
+      lastName: "Ng",
+      isDuesPaid: false,
+    },
+  });
+
+  // archiveSeason smoke creates extra seasons; collapse back to a single active row.
+  await prisma.season.updateMany({ data: { isActive: false } });
 
   await prisma.season.upsert({
     where: { id: IDS.archivedSeason },

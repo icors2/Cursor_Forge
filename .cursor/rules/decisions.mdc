@@ -7,6 +7,13 @@ alwaysApply: false
 
 Record choices that later agents should not silently reverse. Newest first.
 
+## 2026-09-20 — Volunteer module (capacity lock)
+
+- **Decision:** Isolated `VolunteeringModule`. ADMIN creates slots; PARENT registers; other roles list only. Capacity is `SELECT … FOR UPDATE` + recount, then insert; HTTP 409 when full or unique `(userId, slotId)` conflicts. Additive `seasonId` on `VolunteerSlot` so lists default to the active season (Setup.md model had no season).
+- **Why:** Setup.md names ADMIN for volunteer setup and PARENT for signup. Event-style counts, not `capacity = capacity - 1`. Season leakage was already a documented failure mode.
+- **Alternatives rejected:** COACH creating slots (not in Setup.md); PLAYER signup; check-then-insert without a lock; skipping seasonId.
+- **Revisit when:** volunteer slots should attach to a specific Game.
+
 ## 2026-09-20 — First-slice security review
 
 ```text

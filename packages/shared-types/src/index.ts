@@ -154,3 +154,145 @@ export interface VolunteerRegistrationView {
   /** Parent user id. */
   userId: string;
 }
+
+/** Season row for list + archive UI. */
+export interface SeasonView {
+  /** Season id. */
+  id: string;
+  /** Calendar year (e.g. 2026). */
+  year: number;
+  /** Display name (e.g. Fall 2026). */
+  name: string;
+  /** Exactly one season should be active. */
+  isActive: boolean;
+}
+
+/** POST /seasons/archive — name/year of the NEW empty season. */
+export interface ArchiveSeasonRequest {
+  /** New season display name. */
+  name: string;
+  /** New season year. */
+  year: number;
+}
+
+/** archiveSeason result: previous season frozen, new empty season active. */
+export interface ArchiveSeasonResult {
+  /** Season that was set isActive=false. */
+  archived: SeasonView;
+  /** Newly created empty season (isActive=true). */
+  created: SeasonView;
+}
+
+/** Team card for roster/calendar pages. */
+export interface TeamView {
+  /** Team id. */
+  id: string;
+  /** Team display name. */
+  name: string;
+  /** Owning season. */
+  seasonId: string;
+  /** Season display name. */
+  seasonName: string;
+  /** Whether this season is the active one. */
+  seasonActive: boolean;
+  /** Roster size (read-side count). */
+  rosterCount: number;
+}
+
+/** POST /teams body — always attached to the active season. */
+export interface CreateTeamRequest {
+  /** Team display name. */
+  name: string;
+}
+
+/** POST /teams/:id/roster body. */
+export interface CreateRosterRequest {
+  /** Player user id to assign. */
+  userId: string;
+  /** Optional jersey number. */
+  jerseyNum?: number | null;
+}
+
+/** POST /games body — scheduledAt must be a UTC instant. */
+export interface CreateGameRequest {
+  /** Home team (must belong to the active season). */
+  teamId: string;
+  /** Opponent label. */
+  opponent: string;
+  /** Kickoff instant in UTC ISO-8601. */
+  scheduledAt: string;
+}
+
+/** Club announcement shown on the board. */
+export interface AnnouncementView {
+  /** Announcement id. */
+  id: string;
+  /** Headline. */
+  title: string;
+  /** Body text. */
+  content: string;
+  /** Author user id. */
+  authorId: string;
+  /** Author display name. */
+  authorName: string;
+  /** Created instant UTC ISO-8601. */
+  createdAt: string;
+  /** Optional expiry instant UTC ISO-8601. */
+  expiresAt: string | null;
+}
+
+/** POST /announcements body. */
+export interface CreateAnnouncementRequest {
+  /** Headline. */
+  title: string;
+  /** Body text. */
+  content: string;
+  /** Optional UTC expiry. */
+  expiresAt?: string | null;
+}
+
+/** Private coach note about a player. */
+export interface CoachNoteView {
+  /** Note id. */
+  id: string;
+  /** Player user id. */
+  playerId: string;
+  /** Player display name. */
+  playerName: string;
+  /** Author coach/admin id. */
+  coachId: string;
+  /** Author display name. */
+  coachName: string;
+  /** Note body. */
+  content: string;
+  /** Created instant UTC ISO-8601. */
+  createdAt: string;
+}
+
+/** POST /notes body. */
+export interface CreateCoachNoteRequest {
+  /** Player user id the note is about. */
+  playerId: string;
+  /** Note body. */
+  content: string;
+}
+
+/** PATCH /users/:id/dues — ADMIN only. Never accepted on a generic user update. */
+export interface UpdateDuesRequest {
+  /** New dues flag. */
+  isDuesPaid: boolean;
+}
+
+/** ADMIN-provisioned account (not public self-serve signup). */
+export interface ProvisionUserRequest {
+  /** Login email. */
+  email: string;
+  /** Temporary password; never logged. */
+  password: string;
+  /** Given name. */
+  firstName: string;
+  /** Family name. */
+  lastName: string;
+  /** Portal role. */
+  role: Role;
+}
