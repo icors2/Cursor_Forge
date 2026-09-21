@@ -13,10 +13,13 @@ Stable ports: **3010** (Next.js web) and **4010** (NestJS API). Both bind `0.0.0
 From the repo root, with `.env` already filled (`DATABASE_URL`, `JWT_SECRET`, … — never commit `.env`):
 
 ```bash
+npm install             # required once (and after pulling lockfile changes)
 npm run dev:pg          # skip if Postgres is already up on 5433
 npm run db:setup        # first time, or after pulling migrations
 npm run dev:lan         # or: tmux new-session -d -s vm-lan 'npm run dev:lan'
 ```
+
+If Nest prints `PackageLoader` / `No driver (HTTP)`, `node_modules` is incomplete or mixed Nest 12 adapters with Nest 10. Stay on the repo root and run `npm install` — do not `npm install @nestjs/platform-express@latest`.
 
 `dev:lan` auto-detects the LAN IPv4, starts the API and web on `0.0.0.0`, sets:
 

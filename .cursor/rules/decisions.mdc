@@ -7,6 +7,13 @@ alwaysApply: false
 
 Record choices that later agents should not silently reverse. Newest first.
 
+## 2026-09-21 — Nest 10 + Express HTTP adapter
+
+- **Decision:** The API stays on Nest 10 with `@nestjs/platform-express` (and `@nestjs/platform-socket.io` for the stats gateway). Root `overrides` pin those packages to `^10.4.15`. `NestFactory.create(AppModule)` uses the Express default — not Fastify.
+- **Why:** `npm install @nestjs/platform-express@latest` pulls Nest 12 ESM (`"type": "module"`). Nest 10 core `require()`s the adapter and PackageLoader reports "No driver (HTTP)".
+- **Alternatives rejected:** Nest 12 (Node >= 20, Express 5, ESM); Fastify adapter (Setup.md is Express-style).
+- **Revisit when:** the stack is upgraded to Nest 12 as a coordinated bump of all `@nestjs/*` packages.
+
 ## 2026-09-20 — LAN browser test via `dev:lan`
 
 - **Decision:** `npm run dev:lan` (`scripts/dev-lan.mjs`) auto-detects the host IPv4, binds Next (3010) and Nest (4010) on `0.0.0.0`, sets `NEXT_PUBLIC_API_URL=http://<LAN_IP>:4010` and adds that origin to `WEB_ORIGIN`. Documented in `TESTING.md`. Do not disable the firewall; document `ufw allow` instead.

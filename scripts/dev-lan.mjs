@@ -7,6 +7,7 @@
 
 import { execSync, spawn } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { createConnection } from "node:net";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -18,6 +19,28 @@ const PG_PORT = Number(process.env.PG_PORT ?? 5433);
 
 /** Child processes to stop on Ctrl+C. */
 const children = [];
+const requireFromApi = createRequire(join(root, "apps/api-server/package.json"));
+
+/**
+ * Nest 10 `NestFactory.create()` does `require('@nestjs/platform-express')`.
+ * A missing adapter, or Nest 12 ESM mixed with Nest 10 core, shows up as PackageLoader HTTP driver.
+ */
+function assertNestHttpDriver() {
+  const missing = [];
+  for (const name of ["@nestjs/core", "@nestjs/platform-express", "@nestjs/platform-socket.io"]) {
+    try {
+      requireFromApi.resolve(name);
+    } catch {
+      missing.push(name);
+    }
+  }
+  if (missing.length > 0) {
+    throw new Error(
+      `Missing ${missing.join(", ")}. From the repo root run: npm install\n` +
+        "Do not install @nestjs/platform-express@latest (Nest 12 ESM) next to Nest 10.",
+    );
+  }
+}
 
 /** Loads .env into process.env without overriding already-set keys. Never logs values. */
 function loadDotEnv() {
@@ -135,6 +158,7 @@ function shutdown(code = 0) {
  */
 async function main() {
   loadDotEnv();
+  assertNestHttpDriver();
   const lanIp = detectLanIp();
   const webUrl = `http://${lanIp}:${WEB_PORT}`;
   const apiUrl = `http://${lanIp}:${API_PORT}`;

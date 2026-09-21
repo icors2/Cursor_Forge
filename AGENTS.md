@@ -78,7 +78,7 @@ Cursor does not keep chat history as memory. **Rules are the memory.**
 
 - **Product:** Volleyball Manager — club seasons, rosters, live stats, volunteer, calendar, announcements, coach notes, season archive, dues, per-account theme. Audience: ADMIN, COACH, PLAYER, PARENT.
 - **Stack:** Next.js 14 App Router + Tailwind (`apps/web-client`), NestJS (`apps/api-server`), PostgreSQL + Prisma (`packages/database`), Socket.io, npm workspaces, Docker Compose.
-- **Install:** Node 18+ and npm. `npm install` at repo root. Copy `.env.example` to `.env` and fill values (never commit `.env`).
+- **Install:** Node 18+ and npm. `npm install` at repo root (required before `dev:lan`). Copy `.env.example` to `.env` and fill values (never commit `.env`).
 - **Database:** `docker compose up postgres` **or** `npm run dev:pg` (embedded Postgres on 5433). Then `npm run db:setup` (migrate + seed).
 - **Run:** `npm run dev:api` (0.0.0.0:4010) and `npm run dev:web` (0.0.0.0:3010). **LAN / Windows PC:** `npm run dev:lan` then open `http://<LAN_IP>:3010` (see `TESTING.md`). Containers: `docker compose up --build`.
 - **Test / lint:** `npm run typecheck -w @volleyball-manager/api-server` and `-w @volleyball-manager/web-client`. Web `next build` typechecks pages.

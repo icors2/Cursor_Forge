@@ -7,6 +7,10 @@ alwaysApply: false
 
 Write the mistake, the signal, and the fix. Newest first.
 
+## 2026-09-21 — Nest HTTP driver
+
+- **`PackageLoader` / `No driver (HTTP)`.** Signal: Nest core loaded but `require('@nestjs/platform-express')` failed. Causes: skipped `npm install`, or installing `@nestjs/platform-express@latest` (Nest 12 ESM) next to Nest 10. Fix: keep all `@nestjs/{common,core,platform-express,platform-socket.io,websockets}` on `^10.4.15`; from repo root run `npm install`. Root `overrides` pin those packages. Do not switch to Fastify.
+
 ## 2026-09-20 — LAN browser testing
 
 - **`NEXT_PUBLIC_API_URL=http://localhost:4010` breaks a PC browser.** Signal: the Windows machine calls itself, not the worker. Fix: `npm run dev:lan` sets `http://<LAN_IP>:4010` and adds `http://<LAN_IP>:3010` to `WEB_ORIGIN`. Override with `LAN_IP=…` (Tailscale IP works the same).
