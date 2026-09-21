@@ -1,0 +1,162 @@
+// Prisma schema for Volleyball Manager.
+// Core + volunteer + coach notes + announcements. iCal is derived from Game.scheduledAt (UTC).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Portal account. isDuesPaid and themeColor are ADMIN-managed on dedicated routes.
+model User {
+  id            String                   @id @default(uuid())
+  email         String                   @unique
+  passwordHash  String
+  role          Role                     @default(PLAYER)
+  firstName     String
+  lastName      String
+  isDuesPaid    Boolean                  @default(false)
+  /// Accent hex (#rrggbb) applied as --theme after login. Default is the court-400 brand green.
+  themeColor    String                   @default("#3dcf8e")
+  rosterEntries  Roster[]
+  volunteering   VolunteerRegistration[]
+  notesTargeted  CoachNote[]             @relation("PlayerNotes")
+  notesAuthored  CoachNote[]             @relation("AuthoredNotes")
+  announcements  Announcement[]
+}
+
+enum Role {
+  ADMIN
+  COACH
+  PLAYER
+  PARENT
+}
+
+// A season owns teams and games. Exactly one row should have isActive=true (partial unique index).
+model Season {
+  id       String  @id @default(uuid())
+  year     Int
+  name     String
+  isActive Boolean @default(true)
+  teams          Team[]
+  games          Game[]
+  volunteerSlots VolunteerSlot[]
+}
+
+// Team belongs to one season. List queries default to the active season.
+model Team {
+  id       String  @id @default(uuid())
+  name     String
+  seasonId String
+  season   Season  @relation(fields: [seasonId], references: [id])
+  roster   Roster[]
+  games    Game[]  @relation("TeamGames")
+
+  @@index([seasonId])
+}
+
+// Player assignment on a team. Stats hang off this row, not the User directly.
+model Roster {
+  id        String @id @default(uuid())
+  userId    String
+  teamId    String
+  jerseyNum Int?
+  user      User   @relation(fields: [userId], references: [id])
+  team      Team   @relation(fields: [teamId], references: [id])
+  stats     Stat[]
+
+  @@unique([userId, teamId])
+}
+
+// Scheduled match. scheduledAt is stored in UTC.
+model Game {
+  id          String   @id @default(uuid())
+  teamId      String
+  opponent    String
+  scheduledAt DateTime
+  seasonId    String
+  team        Team     @relation("TeamGames", fields: [teamId], references: [id])
+  season      Season   @relation(fields: [seasonId], references: [id])
+  stats       Stat[]
+
+  @@index([seasonId])
+  @@index([teamId])
+}
+
+// Event-sourced stat. Insert a new row per tap — never UPDATE a counter.
+model Stat {
+  id        String   @id @default(uuid())
+  gameId    String
+  rosterId  String
+  type      StatType
+  timestamp DateTime @default(now())
+  game      Game     @relation(fields: [gameId], references: [id])
+  roster    Roster   @relation(fields: [rosterId], references: [id])
+
+  @@index([gameId])
+  @@index([rosterId])
+}
+
+enum StatType {
+  KILL
+  ACE
+  BLOCK
+  DIG
+  ERROR
+}
+
+// Volunteer shift. startTime/endTime are UTC. seasonId is additive so lists default to the active season.
+model VolunteerSlot {
+  id             String                   @id @default(uuid())
+  title          String
+  startTime      DateTime
+  endTime        DateTime
+  capacity       Int
+  seasonId       String
+  season         Season                   @relation(fields: [seasonId], references: [id])
+  registrations  VolunteerRegistration[]
+
+  @@index([seasonId])
+}
+
+// One signup per user per slot. Capacity is enforced in a transaction with FOR UPDATE, not a counter.
+model VolunteerRegistration {
+  id     String        @id @default(uuid())
+  userId String
+  slotId String
+  user   User          @relation(fields: [userId], references: [id])
+  slot   VolunteerSlot @relation(fields: [slotId], references: [id])
+
+  @@unique([userId, slotId])
+  @@index([slotId])
+}
+
+// Private coach observation about a rostered player. Not visible to PLAYER/PARENT.
+model CoachNote {
+  id        String   @id @default(uuid())
+  playerId  String
+  coachId   String
+  content   String
+  createdAt DateTime @default(now())
+  player    User     @relation("PlayerNotes", fields: [playerId], references: [id])
+  coach     User     @relation("AuthoredNotes", fields: [coachId], references: [id])
+
+  @@index([playerId])
+  @@index([coachId])
+}
+
+// Club-wide announcement. Expired rows stay stored; list endpoints hide them.
+model Announcement {
+  id        String    @id @default(uuid())
+  title     String
+  content   String
+  authorId  String
+  createdAt DateTime  @default(now())
+  expiresAt DateTime?
+  author    User      @relation(fields: [authorId], references: [id])
+
+  @@index([authorId])
+}

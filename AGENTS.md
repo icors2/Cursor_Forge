@@ -70,18 +70,24 @@ Cursor does not keep chat history as memory. **Rules are the memory.**
 - User MCP, user skills, and user hooks do not apply here. Use repo files only.
 - `.cursor/environment.json` `install` must stay idempotent. Long-running processes belong in `start` / `terminals`.
 - Cloud MCP is configured in the Cursor dashboard as well as (optionally) `.cursor/mcp.json`. Prefer HTTP MCP. SSE and `mcp-remote` are not supported in Cloud Agents.
-- After bootstrap, put Cloud-only setup notes in this section.
+- Do not `docker compose up` from `install`. After scaffold, put Compose/dev servers in `start` / `terminals`.
+- Team/dashboard MCP still required for Cloud; laptop `~/.cursor/mcp.json` does not apply. Enabled project servers: context7 (HTTP), playwright (stdio in the VM).
+- If `npm` is missing on PATH, run scripts with the bundled Node under `~/.local/share/cursor-agent/versions/*/node`.
 
 ## Project-specific
 
-_Status: not bootstrapped._
-
-Replace this section during bootstrap with:
-
-- What this product is
-- Stack and package manager
-- How to install, run, test, and lint
-- Required environment variables (names only)
-- Enabled MCP servers and why
-- How to verify a change (browser, tests, or CLI)
-- Deploy URL and rollback (after first deploy)
+- **Product:** Volleyball Manager — club seasons, rosters, live stats, volunteer, calendar, announcements, coach notes, season archive, dues, per-account theme. Audience: ADMIN, COACH, PLAYER, PARENT.
+- **Stack:** Next.js 14 App Router + Tailwind (`apps/web-client`), NestJS (`apps/api-server`), PostgreSQL + Prisma (`packages/database`), Socket.io, npm workspaces, Docker Compose.
+- **Install:** Node 18+ and npm. `npm install` at repo root (required before `dev:lan`). Copy `.env.example` to `.env` and fill values (never commit `.env`).
+- **Database:** `docker compose up postgres` **or** `npm run dev:pg` (embedded Postgres on 5433). Then `npm run db:setup` (migrate + seed).
+- **Run:** `npm run dev:api` (0.0.0.0:4010) and `npm run dev:web` (0.0.0.0:3010). **LAN / Windows PC:** `npm run dev:lan` then open `http://<LAN_IP>:3010` (see `TESTING.md`). Containers: `docker compose up --build`.
+- **Test / lint:** `npm run typecheck -w @volleyball-manager/api-server` and `-w @volleyball-manager/web-client`. Web `next build` typechecks pages.
+- **Verify a change:** `npm run smoke` — live stats + Socket.io; volunteer 409 lock; iCal UTC `YYYYMMDDThhmmssZ`; announcements; coach notes; teams/roster; ADMIN-only dues; ADMIN-only theme; `archiveSeason` then re-seed. Targeted: `npm run smoke:theme` / `smoke:ical` / etc.
+- **UI routes:** `/` login, `/home` hub, `/live`, `/coach`, `/volunteer`, `/calendar`, `/announcements`, `/notes`, `/teams`, `/seasons`, `/dues`, `/theme`.
+- **Demo seed (local only):** password `Demo1234!` — `admin@demo.local`, `coach@demo.local`, `parent@demo.local`, `parent2@demo.local`, `parent-unpaid@demo.local`, `player@demo.local`, `player2@demo.local`, `player-unpaid@demo.local`. Active season Fall 2026, team Forge United, games vs Riverside + Harbor.
+- **Env vars (names):** `DATABASE_URL`, `JWT_SECRET`, `NEXT_PUBLIC_API_URL`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`. Optional: `JWT_EXPIRES_IN`, `PORT` / `API_PORT`, `WEB_ORIGIN`, `LAN_IP`, `CONTEXT7_API_KEY`.
+- **MCP enabled:** `context7`, `playwright`.
+- **Domain skill:** `add-domain-module`.
+- **Security:** JWT httpOnly cookie + Bearer; `isDuesPaid` only via `PATCH /users/:id/dues` (ADMIN); `themeColor` only via `PATCH /users/:id/theme` (ADMIN). iCal feed is public. Threat model in `decisions.mdc`. Re-run `security-review` before a public URL.
+- **Deploy URL / rollback:** none yet.
+- **Starter check:** `npm run verify`.

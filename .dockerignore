@@ -1,0 +1,17 @@
+.git
+.github
+.cursor
+.env
+.env.*
+!.env.example
+node_modules
+dist
+build
+.next
+coverage
+.venv
+__pycache__
+assets
+docs
+*.md
+!package.json
