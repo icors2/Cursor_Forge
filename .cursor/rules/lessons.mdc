@@ -11,6 +11,7 @@ Write the mistake, the signal, and the fix. Newest first.
 
 - **`NEXT_PUBLIC_API_URL=http://localhost:4010` breaks a PC browser.** Signal: the Windows machine calls itself, not the worker. Fix: `npm run dev:lan` sets `http://<LAN_IP>:4010` and adds `http://<LAN_IP>:3010` to `WEB_ORIGIN`. Override with `LAN_IP=…` (Tailscale IP works the same).
 - **Port 4010 leftover API still has localhost CORS.** Signal: `EADDRINUSE` or LAN origin rejected. Fix: stop the old listener (`ss -tlnp | grep 4010`) then restart `dev:lan`.
+- **`allowedDevOrigins` is unrecognized on Next 14.2.25.** Signal: `Invalid next.config.mjs` warning. Fix: omit it; `next dev -H 0.0.0.0` already serves LAN Host headers on this version.
 
 ## 2026-09-20 — Remaining modules
 
