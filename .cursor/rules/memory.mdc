@@ -23,7 +23,7 @@ Agents update this file. It is the living snapshot of the project.
 ## Current focus
 
 - Full local club stack is on `cursor/start-new-app-b09f` (PR #1), including ADMIN per-account theme colors (`/theme`, `PATCH /users/:id/theme`).
-- Demo: sign in → `/home` hub → each module has a UI route. Admin vs coach accents differ (amber vs sky). Prove APIs with `npm run smoke`.
+- Demo: sign in → `/home` hub. LAN browser test: `npm run dev:lan` → `TESTING.md`.
 - Not in v1: Stripe, Redis, Storybook, public self-serve signup, multi-club.
 
 ## Open questions
@@ -35,7 +35,7 @@ Agents update this file. It is the living snapshot of the project.
 ## Environment (names only)
 
 - Required: `DATABASE_URL`, `JWT_SECRET`, `NEXT_PUBLIC_API_URL`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`
-- Optional: `JWT_EXPIRES_IN`, `PORT` / `API_PORT`, `WEB_ORIGIN`, `CONTEXT7_API_KEY`, `REDIS_URL` (later)
+- Optional: `JWT_EXPIRES_IN`, `PORT` / `API_PORT`, `WEB_ORIGIN`, `LAN_IP`, `CONTEXT7_API_KEY`, `REDIS_URL` (later)
 - Enabled MCP servers: context7, playwright
 - Project skills: starter set plus `add-domain-module`
 
@@ -47,7 +47,7 @@ Agents update this file. It is the living snapshot of the project.
 
 ## Pointers
 
-- Plan: `docs/repo-plan.md` · Slice: `docs/first-slice.md` · Checklist: `assets/checklists/first-slice.md`
+- Pointers: Plan `docs/repo-plan.md` · Slice `docs/first-slice.md` · LAN test `TESTING.md`
 - Seed users (local only): `packages/database/src/seed.ts`
 - Smoke: `npm run smoke` (stats, volunteer, iCal, announcements, notes, teams, dues, theme, archive)
 - Verify starter: `npm run verify`

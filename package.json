@@ -16,6 +16,7 @@
     "build": "npm run build -w @volleyball-manager/shared-types && npm run build -w @volleyball-manager/database && npm run build -w @volleyball-manager/api-server && npm run build -w @volleyball-manager/web-client",
     "dev:api": "npm run start:dev -w @volleyball-manager/api-server",
     "dev:web": "npm run dev -w @volleyball-manager/web-client",
+    "dev:lan": "node scripts/dev-lan.mjs",
     "dev:pg": "node scripts/dev-postgres.mjs --keep",
     "db:generate": "npm run generate -w @volleyball-manager/database",
     "db:migrate": "npm run migrate -w @volleyball-manager/database",

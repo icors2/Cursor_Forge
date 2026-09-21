@@ -7,6 +7,11 @@ alwaysApply: false
 
 Write the mistake, the signal, and the fix. Newest first.
 
+## 2026-09-20 — LAN browser testing
+
+- **`NEXT_PUBLIC_API_URL=http://localhost:4010` breaks a PC browser.** Signal: the Windows machine calls itself, not the worker. Fix: `npm run dev:lan` sets `http://<LAN_IP>:4010` and adds `http://<LAN_IP>:3010` to `WEB_ORIGIN`. Override with `LAN_IP=…` (Tailscale IP works the same).
+- **Port 4010 leftover API still has localhost CORS.** Signal: `EADDRINUSE` or LAN origin rejected. Fix: stop the old listener (`ss -tlnp | grep 4010`) then restart `dev:lan`.
+
 ## 2026-09-20 — Remaining modules
 
 - **iCal clients ignore floating times.** Signal: Google Calendar shifts kickoff. Fix: store UTC; emit `DTSTART:YYYYMMDDThhmmssZ` and `TZID:UTC`.

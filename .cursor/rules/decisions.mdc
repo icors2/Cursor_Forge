@@ -7,6 +7,13 @@ alwaysApply: false
 
 Record choices that later agents should not silently reverse. Newest first.
 
+## 2026-09-20 — LAN browser test via `dev:lan`
+
+- **Decision:** `npm run dev:lan` (`scripts/dev-lan.mjs`) auto-detects the host IPv4, binds Next (3010) and Nest (4010) on `0.0.0.0`, sets `NEXT_PUBLIC_API_URL=http://<LAN_IP>:4010` and adds that origin to `WEB_ORIGIN`. Documented in `TESTING.md`. Do not disable the firewall; document `ufw allow` instead.
+- **Why:** The Windows PC browser is not on this VM. `localhost` in `NEXT_PUBLIC_API_URL` makes the PC call itself, not the worker.
+- **Alternatives rejected:** Hardcoding 192.168.0.212 in source; opening CORS to `*`; disabling ufw.
+- **Revisit when:** a public URL or Tailscale-only access is the default.
+
 ## 2026-09-20 — Per-account theme color (ADMIN)
 
 - **Decision:** Store `User.themeColor` (`#rrggbb`, default `#3dcf8e`). ADMIN writes it only at `PATCH /users/:id/theme`. The web client sets `--theme` / `--theme-strong` on `<html>` so Tailwind `court-400`/`court-600` recolor every module. No dark-mode overhaul.

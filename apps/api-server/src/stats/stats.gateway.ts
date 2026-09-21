@@ -37,7 +37,10 @@ function tokenFromSocket(socket: Socket): string | null {
 /** Authenticated live-stat channel. CORS origins match HTTP. */
 @WebSocketGateway({
   cors: {
-    origin: (process.env.WEB_ORIGIN ?? "http://127.0.0.1:3010,http://localhost:3010").split(","),
+    origin: (process.env.WEB_ORIGIN ?? "http://127.0.0.1:3010,http://localhost:3010")
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean),
     credentials: true,
   },
 })
