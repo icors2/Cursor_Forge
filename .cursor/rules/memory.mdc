@@ -47,7 +47,7 @@ Agents update this file. It is the living snapshot of the project.
 
 ## Pointers
 
-- Pointers: Plan `docs/repo-plan.md` · Slice `docs/first-slice.md` · LAN test `TESTING.md`
+- Plan: `docs/repo-plan.md` · Slice: `docs/first-slice.md` · LAN test: `TESTING.md`
 - Seed users (local only): `packages/database/src/seed.ts`
 - Smoke: `npm run smoke` (stats, volunteer, iCal, announcements, notes, teams, dues, theme, archive)
 - Verify starter: `npm run verify`
