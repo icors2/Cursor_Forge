@@ -132,13 +132,18 @@ async function main() {
     throw new Error("register did not set access_token");
   }
 
+  const createdTeam = await json("/teams", {
+    method: "POST",
+    token: coach.token,
+    body: { name: `Wave2 ${stamp}` },
+  });
   const opened = await json("/registrations", {
     method: "POST",
     token: coach.token,
-    body: { teamId: IDS.msTeam },
+    body: { teamId: createdTeam.data.id },
   });
-  if (!opened.data.isOpen || opened.data.teamId !== IDS.msTeam) {
-    throw new Error("coach should open Middle School registration");
+  if (!opened.data.isOpen || opened.data.teamId !== createdTeam.data.id) {
+    throw new Error("coach should create a team and open registration");
   }
 
   await expectStatus(403, () =>
@@ -208,13 +213,13 @@ async function main() {
     throw new Error("accept should promote to roster with position");
   }
 
-  const team = await json(`/teams/${IDS.msTeam}`, { token: coach.token });
+  const team = await json(`/teams/${createdTeam.data.id}`, { token: coach.token });
   const rostered = team.data.roster.find((row) => row.userId === registered.data.user.id);
   if (!rostered || rostered.position !== "OH") {
-    throw new Error("Middle School roster should include the accepted player at OH");
+    throw new Error("new team roster should include the accepted player at OH");
   }
 
-  const moved = await json(`/teams/${IDS.msTeam}/roster/${rostered.id}`, {
+  const moved = await json(`/teams/${createdTeam.data.id}/roster/${rostered.id}`, {
     method: "PATCH",
     token: coach.token,
     body: { position: "DS" },

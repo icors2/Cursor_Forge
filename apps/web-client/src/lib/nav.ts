@@ -29,7 +29,8 @@ export function navLinksFor(role: Role): ClubNavLink[] {
     links.push(
       { href: "/coach", label: "Stat Tracking", body: "Record live stats for a selected game." },
       { href: "/notes", label: "Notes", body: "Private observations about players." },
-      { href: "/registrations", label: "Registration", body: "Open team apply windows and promote the player pool." },
+      { href: "/registrations", label: "Registration", body: "Create a team, open apply, and promote the player pool." },
+      { href: "/roster", label: "Roster", body: "Set the team and court positions after promoting the pool." },
     );
   }
   if (role === "PARENT" || role === "PLAYER") {

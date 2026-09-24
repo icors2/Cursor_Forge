@@ -4,6 +4,7 @@
  * One team window: applicants submit; staff promote or decline the pool.
  */
 
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import type {
@@ -31,6 +32,7 @@ export default function RegistrationDetailPage() {
   const [preferredPosition, setPreferredPosition] = useState<RosterPosition | "">("");
   const [note, setNote] = useState("");
   const [jerseyByApp, setJerseyByApp] = useState<Record<string, number>>({});
+  const [positionByApp, setPositionByApp] = useState<Record<string, RosterPosition | "">>({});
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -104,8 +106,8 @@ export default function RegistrationDetailPage() {
         {
           method: "POST",
           body: JSON.stringify({
-            jerseyNum: jerseyByApp[app.id] ?? 0,
-            position: app.preferredPosition ?? undefined,
+            jerseyNum: jerseyByApp[app.id],
+            position: positionByApp[app.id] || app.preferredPosition || undefined,
           }),
         },
       );
@@ -143,13 +145,36 @@ export default function RegistrationDetailPage() {
       ) : null}
 
       {staff && detail ? (
-        <button
-          type="button"
-          onClick={handleToggle}
-          className="mb-6 rounded-lg border border-emerald-800 px-3 py-1.5 text-sm hover:border-court-400"
-        >
-          {detail.isOpen ? "Close registration" : "Reopen registration"}
-        </button>
+        <section className="mb-6 rounded-2xl border border-emerald-900 bg-court-900/80 p-5">
+          <p className="text-sm font-semibold">Coach setup</p>
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-emerald-100/70">
+            <li>{detail.isOpen ? "Registration is open" : "Registration is closed"}</li>
+            <li>
+              {detail.applicationCount} in the pool — promote below, then set positions on{" "}
+              <Link href="/roster" className="text-court-400 hover:underline">
+                Roster
+              </Link>
+            </li>
+            <li>
+              Schedule and live stats live on{" "}
+              <Link href="/teams" className="text-court-400 hover:underline">
+                Teams
+              </Link>{" "}
+              and{" "}
+              <Link href="/coach" className="text-court-400 hover:underline">
+                Stat Tracking
+              </Link>
+              .
+            </li>
+          </ul>
+          <button
+            type="button"
+            onClick={handleToggle}
+            className="mt-4 rounded-lg border border-emerald-800 px-3 py-1.5 text-sm hover:border-court-400"
+          >
+            {detail.isOpen ? "Close registration" : "Reopen registration"}
+          </button>
+        </section>
       ) : null}
 
       {canApply ? (
@@ -252,11 +277,31 @@ export default function RegistrationDetailPage() {
                         type="number"
                         min={0}
                         max={99}
-                        value={jerseyByApp[app.id] ?? 0}
+                        value={jerseyByApp[app.id] ?? ""}
                         onChange={(e) =>
                           setJerseyByApp((current) => ({ ...current, [app.id]: Number(e.target.value) }))
                         }
                       />
+                    </label>
+                    <label className="block text-sm">
+                      Position
+                      <select
+                        className="mt-1 rounded-lg border border-emerald-800 bg-court-950 px-3 py-2"
+                        value={positionByApp[app.id] ?? app.preferredPosition ?? ""}
+                        onChange={(e) =>
+                          setPositionByApp((current) => ({
+                            ...current,
+                            [app.id]: e.target.value as RosterPosition | "",
+                          }))
+                        }
+                      >
+                        <option value="">No position yet</option>
+                        {ROSTER_POSITIONS.map((pos) => (
+                          <option key={pos} value={pos}>
+                            {pos} · {ROSTER_POSITION_LABELS[pos]}
+                          </option>
+                        ))}
+                      </select>
                     </label>
                     <button
                       type="button"
