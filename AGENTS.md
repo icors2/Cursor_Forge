@@ -71,7 +71,7 @@ Cursor does not keep chat history as memory. **Rules are the memory.**
 - `.cursor/environment.json` `install` must stay idempotent. Long-running processes belong in `start` / `terminals`.
 - Cloud MCP is configured in the Cursor dashboard as well as (optionally) `.cursor/mcp.json`. Prefer HTTP MCP. SSE and `mcp-remote` are not supported in Cloud Agents.
 - Do not `docker compose up` from `install`. After scaffold, put Compose/dev servers in `start` / `terminals`.
-- Team/dashboard MCP still required for Cloud; laptop `~/.cursor/mcp.json` does not apply. Enabled project servers: context7 (HTTP), playwright (stdio in the VM).
+- Team/dashboard MCP still required for Cloud; laptop `~/.cursor/mcp.json` does not apply. Enabled project servers: context7 (HTTP), playwright (stdio, `--headless` Chromium in the VM).
 - If `npm` is missing on PATH, run scripts with the bundled Node under `~/.local/share/cursor-agent/versions/*/node`.
 
 ## Project-specific
@@ -86,7 +86,7 @@ Cursor does not keep chat history as memory. **Rules are the memory.**
 - **UI routes:** `/` login, `/register` (PARENT/PLAYER, or COACH with invite key), `/home` hub, `/live`, `/coach` (Stat Tracking), `/volunteer`, `/calendar`, `/announcements`, `/notes`, `/teams`, `/roster` (COACH/ADMIN positions), `/seasons`, `/seasons/[id]/history`, `/dues`, `/theme`, `/registrations`, `/admin`.
 - **Demo seed (local only):** password `Demo1234!` — `admin@demo.local`, `coach@demo.local`, `parent@demo.local`, `parent2@demo.local`, `parent-unpaid@demo.local`, `player@demo.local`, `player2@demo.local`, `player-unpaid@demo.local`. Active season Fall 2026, teams Forge United / JV / Middle School, games vs Riverside + Harbor.
 - **Env vars (names):** `DATABASE_URL`, `JWT_SECRET`, `NEXT_PUBLIC_API_URL`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`. Optional: `JWT_EXPIRES_IN`, `PORT` / `API_PORT`, `WEB_ORIGIN`, `LAN_IP`, `CONTEXT7_API_KEY`.
-- **MCP enabled:** `context7`, `playwright`.
+- **MCP enabled:** `context7` (HTTP docs), `playwright` (stdio `@playwright/mcp@latest` + `.cursor/playwright-mcp.json` headless Chromium). Reload MCP after pulling. Cloud Agents also need the same Playwright server in dashboard MCP. Install browsers with `npx playwright install chromium` (runs in `environment.json` `install`).
 - **Domain skill:** `add-domain-module`.
 - **Security:** JWT httpOnly cookie + Bearer; `isDuesPaid` only via `PATCH /users/:id/dues` (ADMIN); `role` only via `PATCH /users/:id/role` (ADMIN); `themeColor` via `PATCH /users/me/theme` (self) or `PATCH /users/:id/theme` (ADMIN). `POST /auth/register` allowlists PARENT/PLAYER, or COACH with a one-time hashed invite (`POST /auth/coach-keys`, never stored in source). ICS import fetches https only and blocks private hosts. Per-team iCal export is public. Threat model in `decisions.mdc`. Re-run `security-review` before a public URL.
 - **Deploy URL / rollback:** none yet.

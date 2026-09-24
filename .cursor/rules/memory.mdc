@@ -37,7 +37,7 @@ Agents update this file. It is the living snapshot of the project.
 
 - Required: `DATABASE_URL`, `JWT_SECRET`, `NEXT_PUBLIC_API_URL`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`
 - Optional: `JWT_EXPIRES_IN`, `PORT` / `API_PORT`, `WEB_ORIGIN`, `LAN_IP`, `CONTEXT7_API_KEY`, `REDIS_URL` (later)
-- Enabled MCP servers: context7, playwright
+- Enabled MCP servers: context7 (HTTP), playwright (stdio, headless Chromium)
 - Project skills: starter set plus `add-domain-module`
 
 ## People and systems

@@ -69,7 +69,7 @@ Starter files (`.cursor/`, `assets/`, `AGENTS.md`) stay at the root.
 Only servers later agents will call while building this product:
 
 - **context7** — current Next.js / NestJS / Prisma / Socket.io docs (`CONTEXT7_API_KEY` optional)
-- **playwright** — browser verification of coach pad + parent board
+- **playwright** — headless Chromium UI verify (`@playwright/mcp@latest --headless --isolated`)
 
 Not enabled: Vercel, Neon, Supabase, Stripe, Linear, Figma, Slack, GitHub MCP.
 

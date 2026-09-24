@@ -216,15 +216,29 @@ Env: `FIGMA_ACCESS_TOKEN`
 
 ## playwright
 
-Use for browser verification of a web UI.
+Use for browser verification of a web UI. Default is **headed** (needs a display). Cloud Agents and this Linux worker have no GUI — use `--headless --isolated`. `--no-sandbox` is required in many VMs. Install Chromium once with `npx playwright install chromium` (also in `.cursor/environment.json` `install`).
 
 ```json
 "playwright": {
   "type": "stdio",
   "command": "npx",
-  "args": ["-y", "@playwright/mcp"]
+  "args": [
+    "-y",
+    "@playwright/mcp@latest",
+    "--config",
+    "${workspaceFolder}/.cursor/playwright-mcp.json",
+    "--headless",
+    "--isolated",
+    "--no-sandbox",
+    "--output-dir",
+    "${workspaceFolder}/.playwright-mcp"
+  ]
 }
 ```
+
+CLI `--browser` only accepts `chrome` / `firefox` / `webkit` / `msedge`. Use the config file `browserName: "chromium"` so Cloud gets Playwright's installed Chromium, not a missing system Chrome.
+
+Cloud Agents still need the same server in dashboard / team MCP. Laptop `~/.cursor/mcp.json` does not apply there. There is no hosted HTTP Playwright MCP — stdio in the VM is the path.
 
 ## chrome-devtools
 

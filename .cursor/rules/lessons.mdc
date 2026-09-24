@@ -7,6 +7,10 @@ alwaysApply: false
 
 Write the mistake, the signal, and the fix. Newest first.
 
+## 2026-09-24 — Playwright MCP missing in Cloud
+
+- **Headed Playwright MCP never appears as tools.** Signal: `GetDynamicTools` has no `playwright` / `browser_*` namespace even though `.cursor/mcp.json` lists the server. Cause: `@playwright/mcp` defaults to headed; no `DISPLAY` on the worker. CLI `--browser chromium` is invalid (only chrome/firefox/webkit/msedge). Fix: `.cursor/playwright-mcp.json` with `browserName: "chromium"` plus `--headless --isolated --no-sandbox`, and `npx playwright install chromium` in `environment.json` `install`. Reload MCP. Cloud still needs the same stdio server in dashboard MCP.
+
 ## 2026-09-23 — ICS import fetch
 
 - **Private ICS URLs / localhost feeds.** Signal: preview 400 "Calendar URL must be https" or "host is not allowed". Cause: import fetch is SSRF-gated (https only, no loopback/RFC1918). Fix: paste ICS text in the preview body (`icsText`) for local fixtures and smokes.

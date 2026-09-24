@@ -9,7 +9,17 @@
     "playwright": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@playwright/mcp"]
+      "args": [
+        "-y",
+        "@playwright/mcp@latest",
+        "--config",
+        "${workspaceFolder}/.cursor/playwright-mcp.json",
+        "--headless",
+        "--isolated",
+        "--no-sandbox",
+        "--output-dir",
+        "${workspaceFolder}/.playwright-mcp"
+      ]
     }
   }
 }

@@ -1,6 +1,8 @@
 # Testing Volleyball Manager from a Windows PC
 
-Headless Linux worker. The **browser runs on the PC**, not on this VM. No desktop/GUI on the worker.
+Headless Linux worker. The **human browser runs on the PC**, not on this VM. No desktop/GUI on the worker.
+
+Agents verify UI with **Playwright MCP** (stdio, headless Chromium) from `.cursor/mcp.json`. Reload MCP after pulling. Cloud Agents also need the same server in dashboard MCP. First-time browsers: `npx playwright install chromium`.
 
 Stable ports: **3010** (Next.js web) and **4010** (NestJS API). Both bind `0.0.0.0`.
 

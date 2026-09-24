@@ -97,6 +97,13 @@ Attackers: anonymous emit, PLAYER writing stats, isDuesPaid self-edit (no generi
 - **Alternatives rejected:** Scaffolding every module in Setup.md before a working path; Redis in v1; Stripe before a processor is named.
 - **Revisit when:** First-slice checklist is green (`assets/checklists/first-slice.md`).
 
+## 2026-09-24 — Playwright MCP is stdio + headless
+
+- **Decision:** Keep Playwright as a project stdio MCP (`npx @playwright/mcp@latest`) with `.cursor/playwright-mcp.json` (`browserName: chromium`, headless, isolated) plus `--no-sandbox`. Install Chromium in `environment.json` `install`. Snapshots go to gitignored `.playwright-mcp/`.
+- **Why:** Headed is the package default and needs a display. Cloud Agents and this worker have none, so the server never registered and UI verify fell back to curl. There is no hosted HTTP Playwright MCP.
+- **Alternatives rejected:** Headed default; Chrome-only channel (not on every machine); chrome-devtools MCP as a second browser server.
+- **Revisit when:** Cursor ships a hosted HTTP Playwright MCP, or laptop headed debug becomes the default.
+
 ## 2026-09-20 — MCP: context7 + playwright only
 
 - **Decision:** Enable `context7` (HTTP docs) and `playwright` (browser verify). No Vercel, Neon, Supabase, Stripe, or GitHub MCP.
