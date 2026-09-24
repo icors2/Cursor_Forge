@@ -4,7 +4,14 @@
  */
 
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
-import type { ArchiveSeasonResult, SeasonView } from "@volleyball-manager/shared-types";
+import type {
+  ArchiveSeasonResult,
+  GameSummary,
+  SeasonHistoryView,
+  SeasonPlayerTotals,
+  SeasonView,
+  StatType,
+} from "@volleyball-manager/shared-types";
 import { PrismaService } from "../prisma/prisma.service";
 import type { ArchiveSeasonDto } from "./seasons.dto";
 
@@ -57,6 +64,57 @@ export class SeasonsService {
     return {
       archived: this.toView(result.archived),
       created: this.toView(result.created),
+    };
+  }
+
+  /** Games plus per-player stat totals for one season (active or archived). */
+  async history(seasonId: string): Promise<SeasonHistoryView> {
+    const season = await this.prisma.season.findUnique({ where: { id: seasonId } });
+    if (!season) {
+      throw new NotFoundException("Season not found");
+    }
+    const games = await this.prisma.game.findMany({
+      where: { seasonId },
+      include: { team: true, season: true },
+      orderBy: { scheduledAt: "asc" },
+    });
+    const stats = await this.prisma.stat.findMany({
+      where: { game: { seasonId } },
+      include: { roster: { include: { user: true } } },
+    });
+    const emptyTotals = (): Record<StatType, number> => ({
+      KILL: 0,
+      ACE: 0,
+      BLOCK: 0,
+      DIG: 0,
+      ERROR: 0,
+    });
+    const byPlayer = new Map<string, SeasonPlayerTotals>();
+    for (const stat of stats) {
+      const key = stat.roster.userId;
+      const current = byPlayer.get(key) ?? {
+        userId: key,
+        playerName: `${stat.roster.user.firstName} ${stat.roster.user.lastName}`,
+        jerseyNum: stat.roster.jerseyNum,
+        totals: emptyTotals(),
+      };
+      current.totals[stat.type] += 1;
+      byPlayer.set(key, current);
+    }
+    const gameViews: GameSummary[] = games.map((game) => ({
+      id: game.id,
+      teamId: game.teamId,
+      teamName: game.team.name,
+      opponent: game.opponent,
+      scheduledAt: game.scheduledAt.toISOString(),
+      seasonId: game.seasonId,
+      seasonName: game.season.name,
+      seasonActive: game.season.isActive,
+    }));
+    return {
+      season: this.toView(season),
+      games: gameViews,
+      players: [...byPlayer.values()].sort((a, b) => a.playerName.localeCompare(b.playerName)),
     };
   }
 

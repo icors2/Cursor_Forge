@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Coach home: pick the active-season game, then open the stat pad.
+ * Stat Tracking home: pick the active-season game, then open the pad.
  */
 
 import Link from "next/link";
@@ -23,7 +23,7 @@ export default function CoachHomePage() {
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-10">
-      <AppHeader title="Coach pad" />
+      <AppHeader title="Stat Tracking" />
       {error ? <p className="text-red-300">{error}</p> : null}
       <ul className="space-y-3">
         {games.map((game) => (
@@ -42,7 +42,9 @@ export default function CoachHomePage() {
           </li>
         ))}
       </ul>
-      {games.length === 0 && !error ? <p className="text-emerald-100/60">No games in the active season.</p> : null}
+      {games.length === 0 && !error ? (
+        <p className="text-emerald-100/60">No games scheduled — add one on Teams or import a calendar.</p>
+      ) : null}
     </main>
   );
 }

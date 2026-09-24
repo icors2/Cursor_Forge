@@ -1,12 +1,12 @@
 "use client";
 
 /**
- * Coach stat pad: tap Kill/Ace/Block/Dig/Error to insert a Stat event.
+ * Stat Tracking pad: pick a game and player, then tap Kill/Ace/Block/Dig/Error.
  */
 
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import type { GameDetail, StatEvent, StatType } from "@volleyball-manager/shared-types";
+import type { GameDetail, GameSummary, StatEvent, StatType } from "@volleyball-manager/shared-types";
 import { STAT_TYPES } from "@volleyball-manager/shared-types";
 import { AppHeader } from "@/components/AppHeader";
 import { api } from "@/lib/api";
@@ -23,7 +23,9 @@ const LABELS: Record<StatType, string> = {
 /** Interactive pad for one active-season game. */
 export default function CoachGamePage() {
   const params = useParams<{ gameId: string }>();
+  const router = useRouter();
   const gameId = params.gameId;
+  const [games, setGames] = useState<GameSummary[]>([]);
   const [game, setGame] = useState<GameDetail | null>(null);
   const [selectedRosterId, setSelectedRosterId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -31,10 +33,16 @@ export default function CoachGamePage() {
   const [lastEvent, setLastEvent] = useState<StatEvent | null>(null);
 
   useEffect(() => {
+    api<GameSummary[]>("/games")
+      .then(setGames)
+      .catch((err: unknown) => setError(err instanceof Error ? err.message : "Could not load games"));
+  }, []);
+
+  useEffect(() => {
     api<GameDetail>(`/games/${gameId}`)
       .then((detail) => {
         setGame(detail);
-        setSelectedRosterId((current) => current ?? detail.roster[0]?.id ?? null);
+        setSelectedRosterId(detail.roster[0]?.id ?? null);
       })
       .catch((err: unknown) => setError(err instanceof Error ? err.message : "Could not load game"));
   }, [gameId]);
@@ -70,29 +78,38 @@ export default function CoachGamePage() {
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-10">
-      <AppHeader title={game ? `${game.teamName} vs ${game.opponent}` : "Loading game"} />
+      <AppHeader title={game ? `${game.teamName} vs ${game.opponent}` : "Stat Tracking"} />
       {error ? <p className="mb-4 text-red-300">{error}</p> : null}
+      <label className="mb-4 block text-sm">
+        Game
+        <select
+          className="mt-1 w-full rounded-lg border border-emerald-800 bg-court-950 px-3 py-2"
+          value={gameId}
+          onChange={(event) => router.push(`/coach/game/${event.target.value}`)}
+        >
+          {games.map((row) => (
+            <option key={row.id} value={row.id}>
+              {row.teamName} vs {row.opponent}
+            </option>
+          ))}
+        </select>
+      </label>
       {player ? (
         <section className="rounded-2xl border border-emerald-900 bg-court-900/80 p-6">
-          <p className="text-sm text-emerald-100/60">Rostered player</p>
-          {game && game.roster.length > 1 ? (
+          <label className="block text-sm text-emerald-100/60">
+            Player
             <select
-              className="mt-2 w-full rounded-lg border border-emerald-800 bg-court-950 px-3 py-2"
+              className="mt-2 w-full rounded-lg border border-emerald-800 bg-court-950 px-3 py-2 text-emerald-50"
               value={player.id}
               onChange={(e) => setSelectedRosterId(e.target.value)}
-              aria-label="Player"
             >
-              {game.roster.map((row) => (
+              {(game?.roster ?? []).map((row) => (
                 <option key={row.id} value={row.id}>
                   #{row.jerseyNum ?? "—"} {row.firstName} {row.lastName}
                 </option>
               ))}
             </select>
-          ) : (
-            <p className="text-2xl font-semibold">
-              #{player.jerseyNum ?? "—"} {player.firstName} {player.lastName}
-            </p>
-          )}
+          </label>
           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
             {STAT_TYPES.map((type) => (
               <button

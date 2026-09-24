@@ -6,7 +6,7 @@ import { BadRequestException, Injectable, NotFoundException } from "@nestjs/comm
 import type { GameDetail, GameSummary, RosterPlayer, StatEvent } from "@volleyball-manager/shared-types";
 import { ActiveSeasonService } from "../common/active-season.service";
 import { PrismaService } from "../prisma/prisma.service";
-import type { CreateGameDto } from "./games.dto";
+import type { CreateGameDto, UpdateGameDto } from "./games.dto";
 
 /** Query string for list/detail season scope. */
 export interface GameQuery {
@@ -19,6 +19,7 @@ export interface GameQuery {
 /** Maps a Prisma game row to the list DTO. */
 function toSummary(game: {
   id: string;
+  teamId: string;
   opponent: string;
   scheduledAt: Date;
   seasonId: string;
@@ -27,6 +28,7 @@ function toSummary(game: {
 }): GameSummary {
   return {
     id: game.id,
+    teamId: game.teamId,
     teamName: game.team.name,
     opponent: game.opponent,
     scheduledAt: game.scheduledAt.toISOString(),
@@ -69,6 +71,42 @@ export class GamesService {
     return toSummary(created);
   }
 
+  /** COACH/ADMIN correct team, opponent, or kickoff on an active-season game. */
+  async update(id: string, dto: UpdateGameDto): Promise<GameSummary> {
+    const season = await this.seasons.getActiveSeason();
+    const existing = await this.prisma.game.findFirst({ where: { id, seasonId: season.id } });
+    if (!existing) {
+      throw new NotFoundException("Game not found in the active season");
+    }
+    let teamId = existing.teamId;
+    if (dto.teamId) {
+      const team = await this.prisma.team.findFirst({
+        where: { id: dto.teamId, seasonId: season.id },
+      });
+      if (!team) {
+        throw new NotFoundException("Team not found in the active season");
+      }
+      teamId = team.id;
+    }
+    let kickoff = existing.scheduledAt;
+    if (dto.scheduledAt) {
+      kickoff = new Date(dto.scheduledAt);
+      if (Number.isNaN(kickoff.getTime())) {
+        throw new BadRequestException("scheduledAt must be a UTC instant");
+      }
+    }
+    const updated = await this.prisma.game.update({
+      where: { id },
+      data: {
+        teamId,
+        opponent: dto.opponent !== undefined ? dto.opponent.trim() : undefined,
+        scheduledAt: kickoff,
+      },
+      include: { team: true, season: true },
+    });
+    return toSummary(updated);
+  }
+
   /** Lists games for the resolved season (active by default). */
   async list(query: GameQuery): Promise<GameSummary[]> {
     const seasonId = await this.seasons.resolveSeasonId({
@@ -106,6 +144,7 @@ export class GamesService {
       firstName: row.user.firstName,
       lastName: row.user.lastName,
       userId: row.userId,
+      position: row.position,
     }));
     const stats: StatEvent[] = game.stats.map((stat) => ({
       id: stat.id,

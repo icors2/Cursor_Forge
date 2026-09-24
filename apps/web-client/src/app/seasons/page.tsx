@@ -1,27 +1,19 @@
 "use client";
 
 /**
- * Season list + ADMIN archiveSeason. Historical games use ?historical=true&seasonId=.
+ * Season list + ADMIN archiveSeason. History opens a printable rollup.
  */
 
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
-import type {
-  ArchiveSeasonRequest,
-  ArchiveSeasonResult,
-  GameSummary,
-  PublicUser,
-  SeasonView,
-} from "@volleyball-manager/shared-types";
+import type { ArchiveSeasonRequest, ArchiveSeasonResult, PublicUser, SeasonView } from "@volleyball-manager/shared-types";
 import { AppHeader } from "@/components/AppHeader";
 import { api } from "@/lib/api";
 
-/** Season archive + historical browse. */
+/** Season archive + history links. */
 export default function SeasonsPage() {
   const [user, setUser] = useState<PublicUser | null>(null);
   const [seasons, setSeasons] = useState<SeasonView[]>([]);
-  const [historical, setHistorical] = useState<GameSummary[]>([]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [name, setName] = useState("Spring 2027");
   const [year, setYear] = useState(2027);
   const [error, setError] = useState<string | null>(null);
@@ -39,18 +31,6 @@ export default function SeasonsPage() {
     reload().catch((err: unknown) => setError(err instanceof Error ? err.message : "Could not load seasons"));
   }, []);
 
-  /** Loads games for a non-active season via the historical query flags. */
-  async function handleOpenHistorical(season: SeasonView): Promise<void> {
-    setSelectedId(season.id);
-    setError(null);
-    try {
-      const games = await api<GameSummary[]>(`/games?historical=true&seasonId=${season.id}`);
-      setHistorical(games);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not load historical games");
-    }
-  }
-
   /** ADMIN archive: freeze current season, start an empty one. */
   async function handleArchive(event: FormEvent): Promise<void> {
     event.preventDefault();
@@ -63,7 +43,6 @@ export default function SeasonsPage() {
         body: JSON.stringify(body),
       });
       setNotice(`Archived ${result.archived.name}. Active season is now ${result.created.name}.`);
-      setHistorical([]);
       await reload();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not archive season");
@@ -74,7 +53,7 @@ export default function SeasonsPage() {
     <main className="mx-auto max-w-3xl px-6 py-10">
       <AppHeader title="Seasons" />
       <p className="mb-6 text-sm text-emerald-100/60">
-        Team, game, and stat lists default to the active season. Historical views need both flags.
+        Open a season history for game results and player totals. Print keeps a paper record.
       </p>
       {error ? <p className="mb-4 text-red-300">{error}</p> : null}
       {notice ? <p className="mb-4 text-court-400">{notice}</p> : null}
@@ -86,36 +65,19 @@ export default function SeasonsPage() {
               {season.name} {season.isActive ? "· active" : ""}
             </p>
             <p className="text-sm text-emerald-100/60">{season.year}</p>
-            {season.isActive ? (
-              <Link href="/live" className="mt-2 inline-block text-sm text-court-400 underline">
-                Open active games
+            <div className="mt-2 flex flex-wrap gap-3 text-sm">
+              {season.isActive ? (
+                <Link href="/live" className="text-court-400 underline">
+                  Open active games
+                </Link>
+              ) : null}
+              <Link href={`/seasons/${season.id}/history`} className="text-court-400 underline">
+                Open history
               </Link>
-            ) : (
-              <button
-                type="button"
-                onClick={() => handleOpenHistorical(season)}
-                className="mt-2 text-sm text-court-400 underline"
-              >
-                View historical games
-              </button>
-            )}
+            </div>
           </li>
         ))}
       </ul>
-
-      {selectedId ? (
-        <section className="mb-8">
-          <p className="mb-2 text-sm font-semibold">Historical games</p>
-          <ul className="space-y-2">
-            {historical.map((game) => (
-              <li key={game.id} className="rounded-xl border border-emerald-900/80 bg-court-900/60 px-4 py-3">
-                {game.teamName} vs {game.opponent}
-              </li>
-            ))}
-          </ul>
-          {historical.length === 0 ? <p className="text-sm text-emerald-100/50">No games in that season.</p> : null}
-        </section>
-      ) : null}
 
       {user?.role === "ADMIN" ? (
         <form onSubmit={handleArchive} className="space-y-3 rounded-2xl border border-amber-900 bg-court-900/80 p-5">
@@ -123,21 +85,25 @@ export default function SeasonsPage() {
           <p className="text-xs text-emerald-100/50">
             This freezes current teams/games in place and opens an empty season. Re-seed locally to restore the demo.
           </p>
-          <input
-            className="w-full rounded-lg border border-emerald-800 bg-court-950 px-3 py-2"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            aria-label="New season name"
-            required
-          />
-          <input
-            className="w-full rounded-lg border border-emerald-800 bg-court-950 px-3 py-2"
-            type="number"
-            value={year}
-            onChange={(e) => setYear(Number(e.target.value))}
-            aria-label="New season year"
-            required
-          />
+          <label className="block text-sm">
+            New season name
+            <input
+              className="mt-1 w-full rounded-lg border border-emerald-800 bg-court-950 px-3 py-2"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </label>
+          <label className="block text-sm">
+            New season year
+            <input
+              className="mt-1 w-full rounded-lg border border-emerald-800 bg-court-950 px-3 py-2"
+              type="number"
+              value={year}
+              onChange={(e) => setYear(Number(e.target.value))}
+              required
+            />
+          </label>
           <button type="submit" className="rounded-lg bg-amber-400 px-4 py-2 font-semibold text-court-950">
             Archive and start new season
           </button>

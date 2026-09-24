@@ -3,10 +3,10 @@
  */
 
 import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
-import type { AnnouncementView } from "@volleyball-manager/shared-types";
+import type { AnnouncementCommentView, AnnouncementView } from "@volleyball-manager/shared-types";
 import { PrismaService } from "../prisma/prisma.service";
 import type { RequestUser } from "../auth/auth.types";
-import type { CreateAnnouncementDto, UpdateAnnouncementDto } from "./announcements.dto";
+import type { CreateAnnouncementDto, CreateCommentDto, UpdateAnnouncementDto } from "./announcements.dto";
 
 /** Prisma include used by every announcement query. */
 const AUTHOR = { author: { select: { firstName: true, lastName: true } } } as const;
@@ -78,6 +78,101 @@ export class AnnouncementsService {
       return;
     }
     throw new ForbiddenException("Cannot change another coach's announcement");
+  }
+
+  /** Lists comments for one announcement (oldest first). */
+  async listComments(announcementId: string): Promise<AnnouncementCommentView[]> {
+    await this.assertAnnouncement(announcementId);
+    const rows = await this.prisma.announcementComment.findMany({
+      where: { announcementId },
+      include: { author: { select: { firstName: true, lastName: true } } },
+      orderBy: { createdAt: "asc" },
+    });
+    return rows.map((row) => this.toComment(row));
+  }
+
+  /** Any authenticated user may comment unless muted. */
+  async addComment(actor: RequestUser, announcementId: string, dto: CreateCommentDto): Promise<AnnouncementCommentView> {
+    await this.assertAnnouncement(announcementId);
+    const muted = await this.prisma.commentMute.findUnique({ where: { mutedUserId: actor.id } });
+    if (muted) {
+      throw new ForbiddenException("You are muted from commenting");
+    }
+    const created = await this.prisma.announcementComment.create({
+      data: {
+        announcementId,
+        authorId: actor.id,
+        content: dto.content.trim(),
+      },
+      include: { author: { select: { firstName: true, lastName: true } } },
+    });
+    return this.toComment(created);
+  }
+
+  /** Author, COACH, or ADMIN may delete a comment. */
+  async removeComment(actor: RequestUser, announcementId: string, commentId: string): Promise<{ ok: true }> {
+    const comment = await this.prisma.announcementComment.findFirst({
+      where: { id: commentId, announcementId },
+    });
+    if (!comment) {
+      throw new NotFoundException("Comment not found");
+    }
+    const staff = actor.role === "ADMIN" || actor.role === "COACH";
+    if (!staff && actor.id !== comment.authorId) {
+      throw new ForbiddenException("Cannot delete another user's comment");
+    }
+    await this.prisma.announcementComment.delete({ where: { id: commentId } });
+    return { ok: true };
+  }
+
+  /** COACH/ADMIN mute a commenter club-wide. */
+  async mute(actor: RequestUser, userId: string): Promise<{ ok: true }> {
+    if (userId === actor.id) {
+      throw new ForbiddenException("Cannot mute yourself");
+    }
+    const target = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!target) {
+      throw new NotFoundException("User not found");
+    }
+    await this.prisma.commentMute.upsert({
+      where: { mutedUserId: userId },
+      update: { mutedById: actor.id },
+      create: { mutedUserId: userId, mutedById: actor.id },
+    });
+    return { ok: true };
+  }
+
+  /** COACH/ADMIN unmute. */
+  async unmute(userId: string): Promise<{ ok: true }> {
+    await this.prisma.commentMute.deleteMany({ where: { mutedUserId: userId } });
+    return { ok: true };
+  }
+
+  /** Ensures the announcement exists. */
+  private async assertAnnouncement(id: string): Promise<void> {
+    const row = await this.prisma.announcement.findUnique({ where: { id } });
+    if (!row) {
+      throw new NotFoundException("Announcement not found");
+    }
+  }
+
+  /** Maps a comment row to the public view. */
+  private toComment(row: {
+    id: string;
+    announcementId: string;
+    authorId: string;
+    content: string;
+    createdAt: Date;
+    author: { firstName: string; lastName: string };
+  }): AnnouncementCommentView {
+    return {
+      id: row.id,
+      announcementId: row.announcementId,
+      authorId: row.authorId,
+      content: row.content,
+      createdAt: row.createdAt.toISOString(),
+      authorName: `${row.author.firstName} ${row.author.lastName}`,
+    };
   }
 
   /** Maps a Prisma row + author to the public view. */

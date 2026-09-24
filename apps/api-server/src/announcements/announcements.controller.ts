@@ -4,13 +4,13 @@
  */
 
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
-import type { AnnouncementView } from "@volleyball-manager/shared-types";
+import type { AnnouncementCommentView, AnnouncementView } from "@volleyball-manager/shared-types";
 import { CurrentUser } from "../auth/current-user.decorator";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { Roles } from "../auth/roles.decorator";
 import { RolesGuard } from "../auth/roles.guard";
 import type { RequestUser } from "../auth/auth.types";
-import { CreateAnnouncementDto, UpdateAnnouncementDto } from "./announcements.dto";
+import { CreateAnnouncementDto, CreateCommentDto, MuteCommenterDto, UpdateAnnouncementDto } from "./announcements.dto";
 import { AnnouncementsService } from "./announcements.service";
 
 /** Isolated announcement routes. */
@@ -34,6 +34,46 @@ export class AnnouncementsController {
   @Roles("COACH", "ADMIN")
   create(@CurrentUser() user: RequestUser, @Body() body: CreateAnnouncementDto): Promise<AnnouncementView> {
     return this.announcements.create(user, body);
+  }
+
+  /** COACH/ADMIN mute a commenter. */
+  @Post("mutes")
+  @Roles("COACH", "ADMIN")
+  mute(@CurrentUser() user: RequestUser, @Body() body: MuteCommenterDto): Promise<{ ok: true }> {
+    return this.announcements.mute(user, body.userId);
+  }
+
+  /** COACH/ADMIN unmute. */
+  @Delete("mutes/:userId")
+  @Roles("COACH", "ADMIN")
+  unmute(@Param("userId") userId: string): Promise<{ ok: true }> {
+    return this.announcements.unmute(userId);
+  }
+
+  /** Comments on one post. */
+  @Get(":id/comments")
+  listComments(@Param("id") id: string): Promise<AnnouncementCommentView[]> {
+    return this.announcements.listComments(id);
+  }
+
+  /** Authenticated comment unless muted. */
+  @Post(":id/comments")
+  addComment(
+    @CurrentUser() user: RequestUser,
+    @Param("id") id: string,
+    @Body() body: CreateCommentDto,
+  ): Promise<AnnouncementCommentView> {
+    return this.announcements.addComment(user, id, body);
+  }
+
+  /** Author or staff delete. */
+  @Delete(":id/comments/:commentId")
+  removeComment(
+    @CurrentUser() user: RequestUser,
+    @Param("id") id: string,
+    @Param("commentId") commentId: string,
+  ): Promise<{ ok: true }> {
+    return this.announcements.removeComment(user, id, commentId);
   }
 
   /** Author or ADMIN update. */

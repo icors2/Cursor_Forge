@@ -3,11 +3,11 @@
  */
 
 import { ConflictException, Injectable, Logger, NotFoundException } from "@nestjs/common";
-import type { PublicUser } from "@volleyball-manager/shared-types";
+import type { PublicUser, Role } from "@volleyball-manager/shared-types";
 import bcrypt from "bcryptjs";
 import { AuthService } from "../auth/auth.service";
 import { PrismaService } from "../prisma/prisma.service";
-import type { ProvisionUserDto, UpdateDuesDto, UpdateThemeDto } from "./users.dto";
+import type { ProvisionUserDto, UpdateDuesDto, UpdateRoleDto, UpdateThemeDto } from "./users.dto";
 
 /** Isolated users / dues domain service. */
 @Injectable()
@@ -19,9 +19,10 @@ export class UsersService {
     private readonly auth: AuthService,
   ) {}
 
-  /** Lists public profiles for the dues admin table. */
-  async list(): Promise<PublicUser[]> {
+  /** Lists public profiles, optionally filtered by role. */
+  async list(role?: Role): Promise<PublicUser[]> {
     const rows = await this.prisma.user.findMany({
+      where: role ? { role } : undefined,
       orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
     });
     return rows.map((row) => this.auth.toPublic(row));
@@ -50,6 +51,20 @@ export class UsersService {
     });
     this.logger.log(`user_provisioned role=${created.role}`);
     return this.auth.toPublic(created);
+  }
+
+  /** Dedicated role write. Logs the change without email or name. */
+  async updateRole(id: string, dto: UpdateRoleDto): Promise<PublicUser> {
+    const existing = await this.prisma.user.findUnique({ where: { id } });
+    if (!existing) {
+      throw new NotFoundException("User not found");
+    }
+    const updated = await this.prisma.user.update({
+      where: { id },
+      data: { role: dto.role },
+    });
+    this.logger.log(`role_updated role=${updated.role}`);
+    return this.auth.toPublic(updated);
   }
 
   /** Dedicated dues write. Logs the change without email or name. */

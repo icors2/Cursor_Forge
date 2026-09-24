@@ -16,3 +16,13 @@ body {
   background: radial-gradient(circle at top, #143528 0%, #07140f 55%);
   color: #ecfdf5;
 }
+
+@media print {
+  body {
+    background: #fff;
+    color: #111;
+  }
+  .print\\:hidden {
+    display: none !important;
+  }
+}

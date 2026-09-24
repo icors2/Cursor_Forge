@@ -66,18 +66,20 @@ async function main() {
     throw new Error("ADMIN should be able to clear dues");
   }
 
-  const rosterReject = await json(`/teams/${IDS.activeTeam}/roster`, {
-    method: "POST",
-    token: admin.token,
-    body: { userId: IDS.playerUnpaid, jerseyNum: 99 },
-  }).then(
-    () => {
-      throw new Error("unpaid player should not join a live roster");
-    },
-    (err) => err,
-  );
-  if (rosterReject.status !== 400) {
-    throw new Error(`expected 400 adding unpaid player, got ${rosterReject.status}`);
+  // Roster is allowed before dues are paid; volunteer signup is still gated.
+  try {
+    const rostered = await json(`/teams/${IDS.activeTeam}/roster`, {
+      method: "POST",
+      token: admin.token,
+      body: { userId: IDS.playerUnpaid, jerseyNum: 99 },
+    });
+    if (rostered.data.userId !== IDS.playerUnpaid) {
+      throw new Error("unpaid player should be addable to a roster");
+    }
+  } catch (err) {
+    if (err.status !== 409) {
+      throw err;
+    }
   }
 
   const directory = await json("/users", { token: admin.token });

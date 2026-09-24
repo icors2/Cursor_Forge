@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Theme settings: ADMIN edits each account's accent; others see their assigned color only.
+ * Theme settings: everyone edits their own accent; ADMIN can still set others.
  */
 
 import { FormEvent, useEffect, useState } from "react";
@@ -10,14 +10,15 @@ import { AppHeader } from "@/components/AppHeader";
 import { api } from "@/lib/api";
 import { applyThemeColor, FALLBACK_THEME, normalizeThemeHex } from "@/lib/theme";
 
-/** Draft hex keyed by user id for the color wheel + text field. */
+/** Draft hex keyed by user id. */
 type Drafts = Record<string, string>;
 
-/** Per-account theme editor (ADMIN) or read-only swatch (everyone else). */
+/** Self-serve theme picker plus optional ADMIN directory. */
 export default function ThemePage() {
   const [user, setUser] = useState<PublicUser | null>(null);
   const [directory, setDirectory] = useState<PublicUser[]>([]);
   const [drafts, setDrafts] = useState<Drafts>({});
+  const [mine, setMine] = useState(FALLBACK_THEME);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
@@ -27,6 +28,7 @@ export default function ThemePage() {
     const me = await api<PublicUser>("/auth/me");
     setUser(me);
     applyThemeColor(me.themeColor);
+    setMine(me.themeColor || FALLBACK_THEME);
     if (me.role === "ADMIN") {
       const list = await api<PublicUser[]>("/users");
       setDirectory(list);
@@ -42,12 +44,40 @@ export default function ThemePage() {
     reload().catch((err: unknown) => setError(err instanceof Error ? err.message : "Could not load theme"));
   }, []);
 
-  /** Updates the draft hex for one account (color input or typed field). */
+  /** Updates the draft hex for one account. */
   function handleDraft(id: string, value: string): void {
     setDrafts((current) => ({ ...current, [id]: value }));
   }
 
-  /** ADMIN PATCH /users/:id/theme — never a generic user update. */
+  /** PATCH /users/me/theme for the signed-in account. */
+  async function handleSaveMine(event: FormEvent): Promise<void> {
+    event.preventDefault();
+    setError(null);
+    setNotice(null);
+    const hex = normalizeThemeHex(mine);
+    if (!hex) {
+      setError("Use a 6-digit hex color such as #3dcf8e.");
+      return;
+    }
+    setPendingId("me");
+    const body: UpdateThemeRequest = { themeColor: hex };
+    try {
+      const updated = await api<PublicUser>("/users/me/theme", {
+        method: "PATCH",
+        body: JSON.stringify(body),
+      });
+      applyThemeColor(updated.themeColor);
+      setUser(updated);
+      setMine(updated.themeColor);
+      setNotice("Saved your theme.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not save theme");
+    } finally {
+      setPendingId(null);
+    }
+  }
+
+  /** ADMIN PATCH /users/:id/theme. */
   async function handleSave(event: FormEvent, target: PublicUser): Promise<void> {
     event.preventDefault();
     setError(null);
@@ -67,6 +97,7 @@ export default function ThemePage() {
       if (user && updated.id === user.id) {
         applyThemeColor(updated.themeColor);
         setUser(updated);
+        setMine(updated.themeColor);
       }
       setNotice(`Saved theme for ${updated.firstName}.`);
       await reload();
@@ -81,26 +112,42 @@ export default function ThemePage() {
     <main className="mx-auto max-w-3xl px-6 py-10">
       <AppHeader title="Theme" />
       <p className="mb-6 text-sm text-emerald-100/60">
-        Accent color is per account and applies to every module after sign-in. Only an admin can change it.
+        Accent color is per account. Everyone can change their own; admins can still set someone else.
       </p>
       {error ? <p className="mb-4 text-red-300">{error}</p> : null}
       {notice ? <p className="mb-4 text-court-400">{notice}</p> : null}
 
-      {user && user.role !== "ADMIN" ? (
-        <section className="rounded-2xl border border-emerald-900 bg-court-900/80 p-5">
-          <p className="text-lg font-semibold">
-            {user.firstName} {user.lastName}
-          </p>
-          <p className="mt-2 text-sm text-emerald-100/60">Your assigned accent</p>
-          <div className="mt-3 flex items-center gap-3">
-            <span
-              className="h-10 w-10 rounded-lg border border-emerald-800"
-              style={{ backgroundColor: user.themeColor || FALLBACK_THEME }}
-              aria-hidden
-            />
-            <code className="text-sm">{user.themeColor || FALLBACK_THEME}</code>
+      {user ? (
+        <form onSubmit={handleSaveMine} className="mb-8 rounded-2xl border border-emerald-900 bg-court-900/80 p-5">
+          <p className="font-semibold">Your accent</p>
+          <div className="mt-3 flex flex-wrap items-end gap-3">
+            <label className="text-sm">
+              Color
+              <input
+                type="color"
+                className="mt-1 block h-10 w-14 cursor-pointer rounded border border-emerald-800 bg-court-950"
+                value={normalizeThemeHex(mine) ?? FALLBACK_THEME}
+                onChange={(e) => setMine(e.target.value)}
+              />
+            </label>
+            <label className="text-sm">
+              Hex
+              <input
+                className="mt-1 block w-28 rounded-lg border border-emerald-800 bg-court-950 px-3 py-2 font-mono text-sm"
+                value={mine}
+                onChange={(e) => setMine(e.target.value)}
+                spellCheck={false}
+              />
+            </label>
+            <button
+              type="submit"
+              disabled={pendingId === "me"}
+              className="rounded-lg bg-court-400 px-4 py-2 text-sm font-semibold text-court-950 disabled:opacity-50"
+            >
+              {pendingId === "me" ? "Saving…" : "Save"}
+            </button>
           </div>
-        </section>
+        </form>
       ) : null}
 
       {user?.role === "ADMIN" ? (

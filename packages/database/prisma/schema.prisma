@@ -23,9 +23,18 @@ model User {
   themeColor    String                   @default("#3dcf8e")
   rosterEntries  Roster[]
   volunteering   VolunteerRegistration[]
-  notesTargeted  CoachNote[]             @relation("PlayerNotes")
-  notesAuthored  CoachNote[]             @relation("AuthoredNotes")
-  announcements  Announcement[]
+  notesTargeted   CoachNote[]             @relation("PlayerNotes")
+  notesAuthored   CoachNote[]             @relation("AuthoredNotes")
+  announcements   Announcement[]
+  comments        AnnouncementComment[]
+  commentMutes    CommentMute[]           @relation("MutedUsers")
+  mutesIssued     CommentMute[]           @relation("MuteAuthors")
+  calendarFeeds        CalendarSubscription[]
+  openedRegistrations  TeamRegistration[]
+  applications         TeamApplication[]      @relation("Applicant")
+  applicationPlayers   TeamApplication[]      @relation("ApplicationPlayer")
+  coachKeysIssued      CoachInviteKey[]       @relation("CoachKeysIssued")
+  coachKeysUsed        CoachInviteKey[]       @relation("CoachKeysUsed")
 }
 
 enum Role {
@@ -33,6 +42,21 @@ enum Role {
   COACH
   PLAYER
   PARENT
+}
+
+/// One-time coach signup key. Only the bcrypt hash is stored; plaintext is shown once at generate.
+model CoachInviteKey {
+  id          String    @id @default(uuid())
+  keyHash     String
+  label       String?
+  createdById String
+  createdAt   DateTime  @default(now())
+  usedAt      DateTime?
+  usedById    String?
+  createdBy   User      @relation("CoachKeysIssued", fields: [createdById], references: [id])
+  usedBy      User?     @relation("CoachKeysUsed", fields: [usedById], references: [id])
+
+  @@index([usedAt])
 }
 
 // A season owns teams and games. Exactly one row should have isActive=true (partial unique index).
@@ -44,6 +68,7 @@ model Season {
   teams          Team[]
   games          Game[]
   volunteerSlots VolunteerSlot[]
+  registrations  TeamRegistration[]
 }
 
 // Team belongs to one season. List queries default to the active season.
@@ -52,23 +77,81 @@ model Team {
   name     String
   seasonId String
   season   Season  @relation(fields: [seasonId], references: [id])
-  roster   Roster[]
-  games    Game[]  @relation("TeamGames")
+  roster       Roster[]
+  games        Game[]            @relation("TeamGames")
+  registration TeamRegistration?
 
   @@index([seasonId])
 }
 
 // Player assignment on a team. Stats hang off this row, not the User directly.
 model Roster {
-  id        String @id @default(uuid())
+  id        String          @id @default(uuid())
   userId    String
   teamId    String
   jerseyNum Int?
-  user      User   @relation(fields: [userId], references: [id])
-  team      Team   @relation(fields: [teamId], references: [id])
+  /// Court position set by the coach on the roster module.
+  position  RosterPosition?
+  user      User            @relation(fields: [userId], references: [id])
+  team      Team            @relation(fields: [teamId], references: [id])
   stats     Stat[]
 
   @@unique([userId, teamId])
+}
+
+/// Volleyball court positions used on roster and applications.
+enum RosterPosition {
+  OH
+  MB
+  S
+  L
+  OPP
+  DS
+}
+
+/// Coach-opened apply window for one team in a season.
+model TeamRegistration {
+  id          String            @id @default(uuid())
+  teamId      String            @unique
+  seasonId    String
+  isOpen      Boolean           @default(true)
+  openedById  String
+  createdAt   DateTime          @default(now())
+  team        Team              @relation(fields: [teamId], references: [id])
+  season      Season            @relation(fields: [seasonId], references: [id])
+  openedBy    User              @relation(fields: [openedById], references: [id])
+  applications TeamApplication[]
+
+  @@index([seasonId])
+}
+
+/// One parent/player apply into a team pool. Coach promotes PENDING → roster.
+model TeamApplication {
+  id                String            @id @default(uuid())
+  registrationId    String
+  applicantId       String
+  playerFirstName   String
+  playerLastName    String
+  playerEmail       String
+  playerUserId      String?
+  preferredPosition RosterPosition?
+  note              String?
+  status            ApplicationStatus @default(PENDING)
+  createdAt         DateTime          @default(now())
+  registration      TeamRegistration  @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  applicant         User              @relation("Applicant", fields: [applicantId], references: [id])
+  player            User?             @relation("ApplicationPlayer", fields: [playerUserId], references: [id])
+
+  @@unique([registrationId, applicantId])
+  @@index([registrationId])
+  @@index([applicantId])
+}
+
+/// Application lifecycle. Only PENDING rows can be accepted or declined.
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
 }
 
 // Scheduled match. scheduledAt is stored in UTC.
@@ -78,12 +161,23 @@ model Game {
   opponent    String
   scheduledAt DateTime
   seasonId    String
+  /// ICS UID when this row was imported; unique so re-import updates instead of duplicating.
+  externalUid String?  @unique
   team        Team     @relation("TeamGames", fields: [teamId], references: [id])
   season      Season   @relation(fields: [seasonId], references: [id])
   stats       Stat[]
 
   @@index([seasonId])
   @@index([teamId])
+}
+
+/// Last imported club ICS URL so coaches can re-preview the same feed.
+model CalendarSubscription {
+  id          String   @id @default(uuid())
+  url         String
+  createdById String
+  createdAt   DateTime @default(now())
+  createdBy   User     @relation(fields: [createdById], references: [id])
 }
 
 // Event-sourced stat. Insert a new row per tap — never UPDATE a counter.
@@ -157,6 +251,31 @@ model Announcement {
   createdAt DateTime  @default(now())
   expiresAt DateTime?
   author    User      @relation(fields: [authorId], references: [id])
+  comments  AnnouncementComment[]
 
   @@index([authorId])
+}
+
+/// Thread reply under a news post. Muted users cannot create new rows.
+model AnnouncementComment {
+  id             String       @id @default(uuid())
+  announcementId String
+  authorId       String
+  content        String
+  createdAt      DateTime     @default(now())
+  announcement   Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  author         User         @relation(fields: [authorId], references: [id])
+
+  @@index([announcementId])
+  @@index([authorId])
+}
+
+/// Club-wide comment mute. COACH/ADMIN set this so a user cannot post comments.
+model CommentMute {
+  id          String   @id @default(uuid())
+  mutedUserId String   @unique
+  mutedById   String
+  createdAt   DateTime @default(now())
+  mutedUser   User     @relation("MutedUsers", fields: [mutedUserId], references: [id])
+  mutedBy     User     @relation("MuteAuthors", fields: [mutedById], references: [id])
 }

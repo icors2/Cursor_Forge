@@ -11,6 +11,7 @@ import { GamesModule } from "./games/games.module";
 import { HealthController } from "./health.controller";
 import { NotesModule } from "./notes/notes.module";
 import { PrismaModule } from "./prisma/prisma.module";
+import { RegistrationsModule } from "./registrations/registrations.module";
 import { SeasonsModule } from "./seasons/seasons.module";
 import { StatsModule } from "./stats/stats.module";
 import { TeamsModule } from "./teams/teams.module";
@@ -29,6 +30,7 @@ import { VolunteeringModule } from "./volunteering/volunteering.module";
     CalendarModule,
     AnnouncementsModule,
     NotesModule,
+    RegistrationsModule,
     SeasonsModule,
     TeamsModule,
     UsersModule,

@@ -1,10 +1,12 @@
 /**
  * Team + roster use-cases. List defaults to the active season.
- * Adding a player to a live roster requires that player's isDuesPaid flag.
+ * Roster add does not require dues — those are due before the season starts.
  */
 
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import type { RosterPlayer, TeamView } from "@volleyball-manager/shared-types";
+import { randomBytes } from "node:crypto";
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
+import type { CreateRosterResult, RosterPlayer, RosterPosition, TeamView } from "@volleyball-manager/shared-types";
+import bcrypt from "bcryptjs";
 import { ActiveSeasonService } from "../common/active-season.service";
 import { PrismaService } from "../prisma/prisma.service";
 import type { CreateRosterDto, CreateTeamDto } from "./teams.dto";
@@ -56,6 +58,7 @@ export class TeamsService {
         firstName: row.user.firstName,
         lastName: row.user.lastName,
         userId: row.userId,
+        position: row.position,
       })),
     };
   }
@@ -72,26 +75,60 @@ export class TeamsService {
 
   /**
    * Adds a PLAYER to an active-season team.
-   * Setup.md: dues often gate live-game roster eligibility — unpaid players are rejected.
+   * Dues are not required here — coaches build the roster before the season starts.
    */
-  async addRoster(teamId: string, dto: CreateRosterDto): Promise<RosterPlayer> {
+  async addRoster(teamId: string, dto: CreateRosterDto): Promise<CreateRosterResult> {
     const season = await this.seasons.getActiveSeason();
     const team = await this.prisma.team.findFirst({ where: { id: teamId, seasonId: season.id } });
     if (!team) {
       throw new NotFoundException("Team not found in the active season");
     }
-    const user = await this.prisma.user.findUnique({ where: { id: dto.userId } });
+    let userId = dto.userId;
+    let temporaryPassword: string | undefined;
+    if (!userId) {
+      const email = dto.email?.toLowerCase().trim();
+      const firstName = dto.firstName?.trim();
+      const lastName = dto.lastName?.trim();
+      if (!email || !firstName || !lastName) {
+        throw new BadRequestException("Provide a player from the list or first name, last name, and email");
+      }
+      const existing = await this.prisma.user.findUnique({ where: { email } });
+      if (existing) {
+        if (existing.role !== "PLAYER") {
+          throw new BadRequestException("That email is already a non-player account");
+        }
+        userId = existing.id;
+      } else {
+        temporaryPassword = randomBytes(6).toString("base64url");
+        const createdUser = await this.prisma.user.create({
+          data: {
+            email,
+            passwordHash: await bcrypt.hash(temporaryPassword, 10),
+            firstName,
+            lastName,
+            role: "PLAYER",
+            isDuesPaid: false,
+          },
+        });
+        userId = createdUser.id;
+      }
+    }
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user || user.role !== "PLAYER") {
       throw new BadRequestException("Roster entries must be PLAYER accounts");
     }
-    if (!user.isDuesPaid) {
-      throw new BadRequestException("Player dues are unpaid");
+    const already = await this.prisma.roster.findUnique({
+      where: { userId_teamId: { userId: user.id, teamId: team.id } },
+    });
+    if (already) {
+      throw new ConflictException("Player is already on this roster");
     }
     const created = await this.prisma.roster.create({
       data: {
         teamId: team.id,
         userId: user.id,
         jerseyNum: dto.jerseyNum ?? null,
+        position: dto.position ?? null,
       },
       include: { user: true },
     });
@@ -101,6 +138,40 @@ export class TeamsService {
       firstName: created.user.firstName,
       lastName: created.user.lastName,
       userId: created.userId,
+      position: created.position,
+      ...(temporaryPassword ? { temporaryPassword } : {}),
+    };
+  }
+
+  /** COACH/ADMIN set jersey and/or court position on an active-season roster row. */
+  async updateRoster(
+    teamId: string,
+    rosterId: string,
+    dto: { jerseyNum?: number | null; position?: RosterPosition | null },
+  ): Promise<RosterPlayer> {
+    const season = await this.seasons.getActiveSeason();
+    const row = await this.prisma.roster.findFirst({
+      where: { id: rosterId, teamId, team: { seasonId: season.id } },
+      include: { user: true },
+    });
+    if (!row) {
+      throw new NotFoundException("Roster row not found in the active season");
+    }
+    const updated = await this.prisma.roster.update({
+      where: { id: row.id },
+      data: {
+        ...(dto.jerseyNum !== undefined ? { jerseyNum: dto.jerseyNum } : {}),
+        ...(dto.position !== undefined ? { position: dto.position } : {}),
+      },
+      include: { user: true },
+    });
+    return {
+      id: updated.id,
+      jerseyNum: updated.jerseyNum,
+      firstName: updated.user.firstName,
+      lastName: updated.user.lastName,
+      userId: updated.userId,
+      position: updated.position,
     };
   }
 

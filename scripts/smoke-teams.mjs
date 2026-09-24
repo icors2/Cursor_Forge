@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Smoke teams/roster/game-create: active-season default, unpaid player rejected, PLAYER cannot create.
+ * Smoke teams/roster/game-create: active-season default, unpaid player allowed on roster, PLAYER cannot create.
  */
 
 import { expectStatus, IDS, json, login } from "./smoke-helpers.mjs";
@@ -50,6 +50,23 @@ async function main() {
   });
   if (game.data.opponent !== "Smoke Opponent" || !game.data.scheduledAt.endsWith("Z")) {
     throw new Error("game create should persist UTC scheduledAt");
+  }
+  if (!game.data.teamId) {
+    throw new Error("game summary should include teamId");
+  }
+
+  const directory = await json("/users?role=PLAYER", { token: coach.token });
+  if (!directory.data.some((row) => row.id === IDS.playerUnpaid)) {
+    throw new Error("coach should list PLAYER accounts for the roster dropdown");
+  }
+
+  const rostered = await json(`/teams/${created.data.id}/roster`, {
+    method: "POST",
+    token: coach.token,
+    body: { userId: IDS.playerUnpaid, jerseyNum: 2 },
+  });
+  if (rostered.data.userId !== IDS.playerUnpaid) {
+    throw new Error("unpaid player should be allowed on the roster before the season starts");
   }
 
   console.log("smoke-teams: PASS");

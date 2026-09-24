@@ -47,3 +47,21 @@ export class UpdateAnnouncementDto {
   @IsDateString()
   expiresAt?: string | null;
 }
+
+/** POST /announcements/:id/comments. */
+export class CreateCommentDto {
+  /** Comment body. */
+  @IsString()
+  @MinLength(1)
+  @MaxLength(2000)
+  content!: string;
+}
+
+/** POST /announcements/mutes. */
+export class MuteCommenterDto {
+  /** User id to mute. */
+  @IsString()
+  @MinLength(8)
+  @MaxLength(64)
+  userId!: string;
+}

@@ -81,6 +81,13 @@ export default function LoginPage() {
           {pending ? "Signing in…" : "Sign in"}
         </button>
       </form>
+      <p className="mt-4 text-sm text-emerald-100/70">
+        New to the club?{" "}
+        <a href="/register" className="font-semibold text-court-400 hover:underline">
+          Create an account
+        </a>
+        . Coaches need a one-time key from an admin.
+      </p>
       <p className="mt-6 text-xs leading-5 text-emerald-100/50">
         Demo: coach@demo.local, parent@demo.local, player@demo.local, admin@demo.local,
         parent-unpaid@demo.local — password Demo1234!

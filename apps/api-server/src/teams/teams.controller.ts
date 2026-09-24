@@ -2,12 +2,12 @@
  * Team + roster HTTP API. Reads are any auth role; writes are ADMIN/COACH.
  */
 
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from "@nestjs/common";
-import type { RosterPlayer, TeamView } from "@volleyball-manager/shared-types";
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
+import type { CreateRosterResult, RosterPlayer, TeamView } from "@volleyball-manager/shared-types";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { Roles } from "../auth/roles.decorator";
 import { RolesGuard } from "../auth/roles.guard";
-import { CreateRosterDto, CreateTeamDto } from "./teams.dto";
+import { CreateRosterDto, CreateTeamDto, UpdateRosterDto } from "./teams.dto";
 import { TeamsService } from "./teams.service";
 
 /** Isolated team routes. */
@@ -39,10 +39,21 @@ export class TeamsController {
     return this.teams.getById(id, historical, seasonId);
   }
 
-  /** ADMIN/COACH add a dues-paid PLAYER to the active-season team. */
+  /** ADMIN/COACH add a PLAYER (existing or newly created, dues not required). */
   @Post(":id/roster")
   @Roles("ADMIN", "COACH")
-  addRoster(@Param("id") id: string, @Body() body: CreateRosterDto): Promise<RosterPlayer> {
+  addRoster(@Param("id") id: string, @Body() body: CreateRosterDto): Promise<CreateRosterResult> {
     return this.teams.addRoster(id, body);
+  }
+
+  /** ADMIN/COACH set jersey and/or court position. */
+  @Patch(":id/roster/:rosterId")
+  @Roles("ADMIN", "COACH")
+  updateRoster(
+    @Param("id") id: string,
+    @Param("rosterId") rosterId: string,
+    @Body() body: UpdateRosterDto,
+  ): Promise<RosterPlayer> {
+    return this.teams.updateRoster(id, rosterId, body);
   }
 }

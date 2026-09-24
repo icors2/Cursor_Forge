@@ -4,7 +4,7 @@
  * Dues: PARENT/PLAYER see their own flag. ADMIN toggles isDuesPaid on a dedicated endpoint.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { PublicUser, UpdateDuesRequest } from "@volleyball-manager/shared-types";
 import { AppHeader } from "@/components/AppHeader";
 import { api } from "@/lib/api";
@@ -30,11 +30,20 @@ export default function DuesPage() {
     reload().catch((err: unknown) => setError(err instanceof Error ? err.message : "Could not load dues"));
   }, []);
 
+  const sorted = useMemo(() => {
+    const rank = (role: PublicUser["role"]): number => (role === "PARENT" || role === "PLAYER" ? 0 : 1);
+    return [...directory].sort((a, b) => rank(a.role) - rank(b.role) || a.lastName.localeCompare(b.lastName));
+  }, [directory]);
+
   /** ADMIN-only PATCH /users/:id/dues — never a generic user update. */
-  async function handleToggle(target: PublicUser): Promise<void> {
+  async function handleToggle(target: PublicUser, nextPaid: boolean): Promise<void> {
+    const action = nextPaid ? "paid" : "unpaid";
+    if (!window.confirm(`Mark ${target.firstName} ${target.lastName} as ${action}?`)) {
+      return;
+    }
     setPendingId(target.id);
     setError(null);
-    const body: UpdateDuesRequest = { isDuesPaid: !target.isDuesPaid };
+    const body: UpdateDuesRequest = { isDuesPaid: nextPaid };
     try {
       await api(`/users/${target.id}/dues`, { method: "PATCH", body: JSON.stringify(body) });
       await reload();
@@ -49,7 +58,7 @@ export default function DuesPage() {
     <main className="mx-auto max-w-3xl px-6 py-10">
       <AppHeader title="Dues" />
       <p className="mb-6 text-sm text-emerald-100/60">
-        Only an admin can change the dues flag. There is no generic profile update that accepts isDuesPaid.
+        Only an admin can change the dues flag. Check Paid to mark a parent or player current.
       </p>
       {error ? <p className="mb-4 text-red-300">{error}</p> : null}
 
@@ -63,28 +72,36 @@ export default function DuesPage() {
       ) : null}
 
       {user?.role === "ADMIN" ? (
-        <ul className="space-y-3">
-          {directory.map((row) => (
-            <li key={row.id} className="flex items-center justify-between gap-4 rounded-2xl border border-emerald-900 bg-court-900/80 p-5">
-              <div>
-                <p className="font-semibold">
+        <table className="w-full text-left text-sm">
+          <thead>
+            <tr className="border-b border-emerald-900 text-emerald-100/60">
+              <th className="py-2">Name</th>
+              <th className="py-2">Role</th>
+              <th className="py-2">Paid</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sorted.map((row) => (
+              <tr key={row.id} className="border-b border-emerald-900/60">
+                <td className="py-3">
                   {row.firstName} {row.lastName}
-                </p>
-                <p className="text-sm text-emerald-100/60">
-                  {row.role} · {row.isDuesPaid ? "paid" : "unpaid"}
-                </p>
-              </div>
-              <button
-                type="button"
-                disabled={pendingId === row.id}
-                onClick={() => handleToggle(row)}
-                className="rounded-lg bg-court-600 px-3 py-2 text-sm font-semibold disabled:opacity-50"
-              >
-                {row.isDuesPaid ? "Mark unpaid" : "Mark paid"}
-              </button>
-            </li>
-          ))}
-        </ul>
+                </td>
+                <td className="py-3">{row.role}</td>
+                <td className="py-3">
+                  <label className="inline-flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={row.isDuesPaid}
+                      disabled={pendingId === row.id}
+                      onChange={(event) => handleToggle(row, event.target.checked)}
+                    />
+                    {row.isDuesPaid ? "Paid" : "Unpaid"}
+                  </label>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       ) : null}
     </main>
   );

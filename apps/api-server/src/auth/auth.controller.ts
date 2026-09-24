@@ -1,14 +1,23 @@
 /**
- * Login, session probe, and logout. No generic user PATCH (blocks isDuesPaid escalation).
+ * Login, register, coach invite keys, session probe, and logout.
+ * No generic user PATCH (blocks isDuesPaid escalation).
  */
 
-import { Body, Controller, Get, HttpException, HttpStatus, Post, Req, Res, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Post, Req, Res, UseGuards } from "@nestjs/common";
 import type { Request, Response } from "express";
-import { DEFAULT_THEME_COLOR, type LoginResponse, type PublicUser } from "@volleyball-manager/shared-types";
+import {
+  DEFAULT_THEME_COLOR,
+  type CoachInviteKeyView,
+  type CreatedCoachInviteKey,
+  type LoginResponse,
+  type PublicUser,
+} from "@volleyball-manager/shared-types";
 import { AuthService } from "./auth.service";
-import { LoginDto } from "./auth.dto";
+import { CreateCoachInviteKeyDto, LoginDto, RegisterDto } from "./auth.dto";
 import { CurrentUser } from "./current-user.decorator";
 import { JwtAuthGuard } from "./jwt-auth.guard";
+import { Roles } from "./roles.decorator";
+import { RolesGuard } from "./roles.guard";
 import type { RequestUser } from "./auth.types";
 
 /** Cookie max-age aligned with default JWT expiry (8h). */
@@ -16,17 +25,19 @@ const COOKIE_MS = 8 * 60 * 60 * 1000;
 
 /** In-memory login throttle: 80 attempts / IP / minute (full `npm run smoke` logs in many demo users). */
 const loginAttempts = new Map<string, { count: number; resetAt: number }>();
+/** Separate register throttle so signup cannot be used to flood account creation. */
+const registerAttempts = new Map<string, { count: number; resetAt: number }>();
 
 /** Returns true when the caller should receive 429. */
-function isLoginThrottled(ip: string): boolean {
+function isThrottled(store: Map<string, { count: number; resetAt: number }>, ip: string, max: number): boolean {
   const now = Date.now();
-  const row = loginAttempts.get(ip);
+  const row = store.get(ip);
   if (!row || now > row.resetAt) {
-    loginAttempts.set(ip, { count: 1, resetAt: now + 60_000 });
+    store.set(ip, { count: 1, resetAt: now + 60_000 });
     return false;
   }
   row.count += 1;
-  return row.count > 80;
+  return row.count > max;
 }
 
 /** Sets the httpOnly access_token cookie used by the web client and Socket.io. */
@@ -54,12 +65,62 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<LoginResponse> {
     const ip = req.ip ?? "unknown";
-    if (isLoginThrottled(ip)) {
+    if (isThrottled(loginAttempts, ip, 80)) {
       throw new HttpException("Too many login attempts", HttpStatus.TOO_MANY_REQUESTS);
     }
     const { token, user } = await this.auth.login(body.email, body.password);
     setAccessCookie(res, token);
     return { user };
+  }
+
+  /** PARENT/PLAYER signup, or COACH when a one-time invite key is supplied. */
+  @Post("register")
+  async register(
+    @Body() body: RegisterDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<LoginResponse> {
+    const ip = req.ip ?? "unknown";
+    if (isThrottled(registerAttempts, ip, 20)) {
+      throw new HttpException("Too many registration attempts", HttpStatus.TOO_MANY_REQUESTS);
+    }
+    const { token, user } = await this.auth.register(
+      body.email,
+      body.password,
+      body.firstName,
+      body.lastName,
+      body.role,
+      body.coachKey,
+    );
+    setAccessCookie(res, token);
+    return { user };
+  }
+
+  /** ADMIN generates a one-time coach key. Plaintext is returned once. */
+  @Post("coach-keys")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("ADMIN")
+  generateCoachKey(
+    @CurrentUser() actor: RequestUser,
+    @Body() body: CreateCoachInviteKeyDto,
+  ): Promise<CreatedCoachInviteKey> {
+    return this.auth.generateCoachKey(actor.id, body.label);
+  }
+
+  /** ADMIN lists invite metadata (no hashes or plaintext). */
+  @Get("coach-keys")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("ADMIN")
+  listCoachKeys(): Promise<CoachInviteKeyView[]> {
+    return this.auth.listCoachKeys();
+  }
+
+  /** ADMIN deletes an unused invite. */
+  @Delete("coach-keys/:id")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("ADMIN")
+  revokeCoachKey(@Param("id") id: string): Promise<{ ok: true }> {
+    return this.auth.revokeCoachKey(id);
   }
 
   /** Clears the session cookie. */

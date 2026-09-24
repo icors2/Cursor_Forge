@@ -4,9 +4,10 @@
  * Parent live board. Subscribes to Socket.io `stat.created` — no full page reload.
  */
 
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import type { GameDetail, StatEvent, StatType } from "@volleyball-manager/shared-types";
+import type { GameDetail, PublicUser, StatEvent, StatType } from "@volleyball-manager/shared-types";
 import { AppHeader } from "@/components/AppHeader";
 import { api } from "@/lib/api";
 import { connectLiveSocket } from "@/lib/socket";
@@ -23,9 +24,14 @@ export default function LiveBoardPage() {
   const params = useParams<{ gameId: string }>();
   const gameId = params.gameId;
   const [game, setGame] = useState<GameDetail | null>(null);
+  const [user, setUser] = useState<PublicUser | null>(null);
   const [stats, setStats] = useState<StatEvent[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [live, setLive] = useState(false);
+
+  useEffect(() => {
+    api<PublicUser>("/auth/me").then(setUser).catch(() => setUser(null));
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -65,6 +71,14 @@ export default function LiveBoardPage() {
     <main className="mx-auto max-w-3xl px-6 py-10">
       <AppHeader title={game ? `${game.teamName} vs ${game.opponent}` : "Live board"} />
       <p className="mb-4 text-sm text-emerald-100/60">{live ? "Live updates on" : "Connecting…"}</p>
+      {user && (user.role === "COACH" || user.role === "ADMIN") ? (
+        <Link
+          href={`/coach/game/${gameId}`}
+          className="mb-4 inline-block rounded-lg bg-court-400 px-3 py-1.5 text-sm font-semibold text-court-950"
+        >
+          Record stats
+        </Link>
+      ) : null}
       {error ? <p className="mb-4 text-red-300">{error}</p> : null}
       <dl className="mb-6 grid grid-cols-5 gap-2 text-center">
         {(["KILL", "ACE", "BLOCK", "DIG", "ERROR"] as StatType[]).map((type) => (

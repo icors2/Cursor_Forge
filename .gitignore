@@ -27,6 +27,7 @@ Thumbs.db
 
 # Cursor / Netlify / Vercel local
 .cursor/hooks/*.local.*
+.playwright-mcp/
 .netlify/
 .vercel/
 

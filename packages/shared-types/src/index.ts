@@ -18,6 +18,40 @@ export type StatType = (typeof STAT_TYPES)[number];
 /** Default accent when a user has no custom theme (court-400 brand green). */
 export const DEFAULT_THEME_COLOR = "#3dcf8e";
 
+/** Court positions a coach can assign on the roster. */
+export const ROSTER_POSITIONS = ["OH", "MB", "S", "L", "OPP", "DS"] as const;
+
+/** One volleyball court position. */
+export type RosterPosition = (typeof ROSTER_POSITIONS)[number];
+
+/** Human labels for roster positions. */
+export const ROSTER_POSITION_LABELS: Record<RosterPosition, string> = {
+  OH: "Outside Hitter",
+  MB: "Middle Blocker",
+  S: "Setter",
+  L: "Libero",
+  OPP: "Opposite",
+  DS: "Defensive Specialist",
+};
+
+/** Player-pool application lifecycle. */
+export const APPLICATION_STATUSES = ["PENDING", "ACCEPTED", "DECLINED"] as const;
+
+/** Status of one team application. */
+export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
+
+/** Roles that public self-serve signup may choose without a coach key. */
+export const PUBLIC_REGISTER_ROLES = ["PARENT", "PLAYER"] as const;
+
+/** Role allowed on POST /auth/register without a coach key. */
+export type PublicRegisterRole = (typeof PUBLIC_REGISTER_ROLES)[number];
+
+/** Roles accepted on POST /auth/register. COACH requires a one-time invite key. */
+export const REGISTER_ROLES = ["PARENT", "PLAYER", "COACH"] as const;
+
+/** Role allowed on POST /auth/register (COACH needs coachKey). */
+export type RegisterRole = (typeof REGISTER_ROLES)[number];
+
 /** Public user fields returned by login /me. Never includes passwordHash. */
 export interface PublicUser {
   /** Stable user id (uuid). */
@@ -32,11 +66,11 @@ export interface PublicUser {
   lastName: string;
   /** ADMIN-managed dues flag; included so the UI can show status, not edit it. */
   isDuesPaid: boolean;
-  /** ADMIN-assigned accent hex (#rrggbb) applied as CSS --theme for this account. */
+  /** Accent hex (#rrggbb) applied as CSS --theme for this account. */
   themeColor: string;
 }
 
-/** PATCH /users/:id/theme — ADMIN only. Never accepted on a generic user update. */
+/** PATCH /users/me/theme (self) or PATCH /users/:id/theme (ADMIN). Never accepted on a generic user update. */
 export interface UpdateThemeRequest {
   /** Accent hex including the leading #. */
   themeColor: string;
@@ -68,6 +102,8 @@ export interface RosterPlayer {
   lastName: string;
   /** Linked user id. */
   userId: string;
+  /** Court position, if the coach set one. */
+  position: RosterPosition | null;
 }
 
 /** Timestamped stat event shown on the live board. */
@@ -92,6 +128,8 @@ export interface StatEvent {
 export interface GameSummary {
   /** Game id. */
   id: string;
+  /** Home team id (needed to edit mapping after ICS import). */
+  teamId: string;
   /** Home team name. */
   teamName: string;
   /** Opponent label. */
@@ -216,12 +254,186 @@ export interface CreateTeamRequest {
   name: string;
 }
 
-/** POST /teams/:id/roster body. */
+/** POST /teams/:id/roster body. Supply userId or a new PLAYER (email + names). */
 export interface CreateRosterRequest {
-  /** Player user id to assign. */
-  userId: string;
+  /** Existing PLAYER user id to assign. */
+  userId?: string;
+  /** New player login email (creates an unpaid PLAYER). */
+  email?: string;
+  /** New player given name. */
+  firstName?: string;
+  /** New player family name. */
+  lastName?: string;
   /** Optional jersey number. */
   jerseyNum?: number | null;
+  /** Optional court position. */
+  position?: RosterPosition | null;
+}
+
+/** PATCH /teams/:id/roster/:rosterId — jersey and/or position. */
+export interface UpdateRosterRequest {
+  /** Replacement jersey. */
+  jerseyNum?: number | null;
+  /** Replacement court position. */
+  position?: RosterPosition | null;
+}
+
+/** POST /auth/register — PARENT/PLAYER, or COACH with a one-time invite key. */
+export interface RegisterRequest {
+  /** Login email. */
+  email: string;
+  /** Plain password; never logged. */
+  password: string;
+  /** Given name. */
+  firstName: string;
+  /** Family name. */
+  lastName: string;
+  /** PARENT/PLAYER freely; COACH only with coachKey. Never ADMIN. */
+  role: RegisterRole;
+  /** One-time invite shown once by an ADMIN. Required when role is COACH. */
+  coachKey?: string;
+}
+
+/** POST /auth/coach-keys — ADMIN generates a one-time coach signup key. */
+export interface CreateCoachInviteKeyRequest {
+  /** Optional note shown in the admin list (not secret). */
+  label?: string;
+}
+
+/** Response from POST /auth/coach-keys. `key` is plaintext and is never stored. */
+export interface CreatedCoachInviteKey {
+  /** Invite row id. */
+  id: string;
+  /** Plaintext key shown once. Copy it; it cannot be retrieved again. */
+  key: string;
+  /** Optional admin note. */
+  label: string | null;
+  /** When the key was generated. */
+  createdAt: string;
+}
+
+/** GET /auth/coach-keys item. Never includes keyHash or plaintext. */
+export interface CoachInviteKeyView {
+  /** Invite row id. */
+  id: string;
+  /** Optional admin note. */
+  label: string | null;
+  /** When the key was generated. */
+  createdAt: string;
+  /** When a coach redeemed it, or null if still unused. */
+  usedAt: string | null;
+  /** User who redeemed it, or null if unused. */
+  usedById: string | null;
+}
+
+/** PATCH /users/:id/role — ADMIN only dedicated endpoint. */
+export interface UpdateRoleRequest {
+  /** Replacement portal role. */
+  role: Role;
+}
+
+/** Coach-opened apply window for one team. */
+export interface TeamRegistrationView {
+  /** Registration id. */
+  id: string;
+  /** Team being applied to. */
+  teamId: string;
+  /** Team display name. */
+  teamName: string;
+  /** Owning season. */
+  seasonId: string;
+  /** Season display name. */
+  seasonName: string;
+  /** Whether parents/players may still apply. */
+  isOpen: boolean;
+  /** Coach/admin who opened the window. */
+  openedById: string;
+  /** Created instant UTC ISO-8601. */
+  createdAt: string;
+  /** Pending + decided applications (staff only; empty for applicants). */
+  applicationCount: number;
+}
+
+/** One row in the player pool. */
+export interface TeamApplicationView {
+  /** Application id. */
+  id: string;
+  /** Parent registration window. */
+  registrationId: string;
+  /** Account that submitted the apply. */
+  applicantId: string;
+  /** Applicant display name. */
+  applicantName: string;
+  /** Applicant role. */
+  applicantRole: Role;
+  /** Player given name offered for the roster. */
+  playerFirstName: string;
+  /** Player family name offered for the roster. */
+  playerLastName: string;
+  /** Player email used on accept (create or match). */
+  playerEmail: string;
+  /** Existing PLAYER id when known. */
+  playerUserId: string | null;
+  /** Applicant's preferred court position. */
+  preferredPosition: RosterPosition | null;
+  /** Optional note from the applicant. */
+  note: string | null;
+  /** Pool status. */
+  status: ApplicationStatus;
+  /** Created instant UTC ISO-8601. */
+  createdAt: string;
+}
+
+/** POST /registrations body. */
+export interface OpenRegistrationRequest {
+  /** Active-season team to open. */
+  teamId: string;
+}
+
+/** PATCH /registrations/:id body. */
+export interface UpdateRegistrationRequest {
+  /** Open or close the apply window. */
+  isOpen: boolean;
+}
+
+/** POST /registrations/:id/applications body. */
+export interface CreateApplicationRequest {
+  /** Player given name (defaults to the applicant). */
+  playerFirstName?: string;
+  /** Player family name (defaults to the applicant). */
+  playerLastName?: string;
+  /** Player email (required for PARENT; PLAYER uses their login). */
+  playerEmail?: string;
+  /** Preferred court position. */
+  preferredPosition?: RosterPosition | null;
+  /** Optional note for the coach. */
+  note?: string;
+}
+
+/** POST /registrations/:id/applications/:appId/accept body. */
+export interface AcceptApplicationRequest {
+  /** Jersey assigned on promote. */
+  jerseyNum?: number | null;
+  /** Court position assigned on promote (falls back to preferred). */
+  position?: RosterPosition | null;
+}
+
+/** Remembered club ICS URL, if any. */
+export interface CalendarSubscriptionView {
+  /** Subscription row id, or null when none is stored. */
+  id: string | null;
+  /** Last imported https URL, or null. */
+  url: string | null;
+  /** Who saved it. */
+  createdById: string | null;
+  /** Saved instant UTC ISO-8601. */
+  createdAt: string | null;
+}
+
+/** Roster add result. temporaryPassword is only set when a new account was created. */
+export interface CreateRosterResult extends RosterPlayer {
+  /** One-time password for a newly provisioned player; never stored in plaintext. */
+  temporaryPassword?: string;
 }
 
 /** POST /games body — scheduledAt must be a UTC instant. */
@@ -232,6 +444,126 @@ export interface CreateGameRequest {
   opponent: string;
   /** Kickoff instant in UTC ISO-8601. */
   scheduledAt: string;
+}
+
+/** PATCH /games/:id — COACH/ADMIN correct team/opponent/kickoff on the active season. */
+export interface UpdateGameRequest {
+  /** Replacement home team (active season). */
+  teamId?: string;
+  /** Replacement opponent label. */
+  opponent?: string;
+  /** Replacement kickoff UTC ISO-8601. */
+  scheduledAt?: string;
+}
+
+/** One comment under a news post. */
+export interface AnnouncementCommentView {
+  /** Comment id. */
+  id: string;
+  /** Parent announcement id. */
+  announcementId: string;
+  /** Author user id. */
+  authorId: string;
+  /** Author display name. */
+  authorName: string;
+  /** Comment body. */
+  content: string;
+  /** Created instant UTC ISO-8601. */
+  createdAt: string;
+}
+
+/** POST /announcements/:id/comments body. */
+export interface CreateCommentRequest {
+  /** Comment body. */
+  content: string;
+}
+
+/** POST /announcements/mutes body. */
+export interface MuteCommenterRequest {
+  /** User id to block from commenting. */
+  userId: string;
+}
+
+/** Preview row from a multi-team ICS feed. */
+export interface CalendarImportEvent {
+  /** ICS UID (used as Game.externalUid). */
+  uid: string;
+  /** Kickoff UTC ISO-8601 when parse succeeded. */
+  scheduledAt: string | null;
+  /** Raw SUMMARY for the review table. */
+  summary: string;
+  /** Best-guess active-season team id. */
+  suggestedTeamId: string | null;
+  /** Best-guess opponent label. */
+  suggestedOpponent: string;
+  /** True when team or kickoff could not be inferred. */
+  unmatched: boolean;
+}
+
+/** POST /calendar/import/preview body. Provide url and/or pasted icsText. */
+export interface CalendarImportPreviewRequest {
+  /** https ICS URL (server-fetched). */
+  url?: string;
+  /** Pasted calendar text for local/smoke fixtures. */
+  icsText?: string;
+}
+
+/** POST /calendar/import/preview result. */
+export interface CalendarImportPreview {
+  /** Source URL when one was stored/used. */
+  url: string | null;
+  /** Parsed events ready for coach/admin review. */
+  events: CalendarImportEvent[];
+}
+
+/** One reviewed row sent to commit. */
+export interface CalendarImportCommitEvent {
+  /** ICS UID. */
+  uid: string;
+  /** Home team id (active season). */
+  teamId: string;
+  /** Opponent label. */
+  opponent: string;
+  /** Kickoff UTC ISO-8601. */
+  scheduledAt: string;
+}
+
+/** POST /calendar/import/commit body. */
+export interface CalendarImportCommitRequest {
+  /** Optional URL to remember as the club subscription. */
+  url?: string;
+  /** Reviewed events to upsert as Game rows. */
+  events: CalendarImportCommitEvent[];
+}
+
+/** POST /calendar/import/commit result. */
+export interface CalendarImportCommitResult {
+  /** Games created or updated. */
+  games: GameSummary[];
+  /** Rows skipped for missing fields. */
+  skipped: number;
+}
+
+/** Per-player season totals for printable history. */
+export interface SeasonPlayerTotals {
+  /** Player user id. */
+  userId: string;
+  /** Display name. */
+  playerName: string;
+  /** Jersey when known. */
+  jerseyNum: number | null;
+  /** Event counts for the season. */
+  totals: Record<StatType, number>;
+}
+
+/** GET /seasons/:id/history — games plus player rollups. */
+export interface SeasonHistoryView {
+  /** Season meta. */
+  season: SeasonView;
+  /** Games in this season. */
+  games: GameSummary[];
+  /** Aggregated stats per player. */
+  players: SeasonPlayerTotals[];
 }
 
 /** Club announcement shown on the board. */

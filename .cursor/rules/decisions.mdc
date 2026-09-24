@@ -7,6 +7,20 @@ alwaysApply: false
 
 Record choices that later agents should not silently reverse. Newest first.
 
+## 2026-09-23 — Coach signup via generated invite keys
+
+- **Decision:** Coaches self-register at `POST /auth/register` with `role=COACH` plus a one-time `coachKey`. ADMIN generates keys at `POST /auth/coach-keys` (`crypto.randomBytes`); only a bcrypt `keyHash` is stored. List/revoke never return plaintext. ADMIN remains provision-only.
+- **Why:** Multiple coaches can join without a hardcoded secret in source. A leaked repo or env file cannot mint coach accounts.
+- **Alternatives rejected:** Hardcoded `COACH_SIGNUP_KEY` in code or `.env.example`; reusable shared password; public COACH without a key.
+- **Revisit when:** keys should expire on a timer or be scoped per team.
+
+## 2026-09-23 — Wave 2 registration + admin console
+
+- **Decision:** Public signup is `POST /auth/register` for PARENT/PLAYER (auto-login cookie), or COACH with a one-time invite key. Coaches open a `TeamRegistration` window; applicants land in `TeamApplication` (player pool); staff accept → roster with optional `RosterPosition`. `/admin` is a hub over dedicated writes (role, dues, provision, archive, volunteer, calendar URL, coach keys) — still no generic user PATCH.
+- **Why:** Club asked for apply/approve plus one admin place without reopening the dues/role escalation hole.
+- **Alternatives rejected:** Public ADMIN signup; treating apply as a second roster table; collapsing role/dues into one user update.
+- **Revisit when:** a payment processor or multi-club tenancy is named.
+
 ## 2026-09-21 — Nest 10 + Express HTTP adapter
 
 - **Decision:** The API stays on Nest 10 with `@nestjs/platform-express` (and `@nestjs/platform-socket.io` for the stats gateway). Root `overrides` pin those packages to `^10.4.15`. `NestFactory.create(AppModule)` uses the Express default — not Fastify.

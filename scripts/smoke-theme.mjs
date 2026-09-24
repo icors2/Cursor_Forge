@@ -47,6 +47,15 @@ async function main() {
       body: { themeColor: "#ff00aa" },
     }),
   );
+
+  const self = await json("/users/me/theme", {
+    method: "PATCH",
+    token: parent.token,
+    body: { themeColor: "#22d3ee" },
+  });
+  if (self.data.themeColor !== "#22d3ee") {
+    throw new Error("signed-in user should be able to PATCH /users/me/theme");
+  }
   await expectStatus(400, () =>
     json(`/users/${parent.user.id}/theme`, {
       method: "PATCH",

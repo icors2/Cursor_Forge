@@ -43,7 +43,14 @@ export class UpdateDuesDto {
   isDuesPaid!: boolean;
 }
 
-/** PATCH /users/:id/theme — ADMIN only dedicated endpoint. */
+/** PATCH /users/:id/role — ADMIN only dedicated endpoint. */
+export class UpdateRoleDto {
+  /** Replacement portal role. */
+  @IsIn(ROLES)
+  role!: Role;
+}
+
+/** PATCH /users/me/theme or PATCH /users/:id/theme. */
 export class UpdateThemeDto {
   /** Accent hex (#rrggbb). Rejects shorthand and non-hex so CSS vars stay safe. */
   @IsString()

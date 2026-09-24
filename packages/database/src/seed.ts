@@ -23,6 +23,8 @@ const IDS = {
   activeSeason: "22222222-2222-4222-8222-222222222222",
   archivedTeam: "33333333-3333-4333-8333-333333333333",
   activeTeam: "44444444-4444-4444-8444-444444444444",
+  jvTeam: "45454545-4545-4545-8545-454545454545",
+  msTeam: "46464646-4646-4646-8646-464646464646",
   archivedGame: "55555555-5555-4555-8555-555555555555",
   activeGame: "66666666-6666-4666-8666-666666666666",
   activeGame2: "61616161-6161-4616-8616-616161616161",
@@ -33,6 +35,8 @@ const IDS = {
   archivedConcessions: "aaaaaaa1-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
   announcement: "b1b1b1b1-b1b1-41b1-81b1-b1b1b1b1b1b1",
   note: "c1c1c1c1-c1c1-41c1-81c1-c1c1c1c1c1c1",
+  jvRegistration: "d2d2d2d2-d2d2-42d2-82d2-d2d2d2d2d2d2",
+  jvApplication: "e3e3e3e3-e3e3-43e3-83e3-e3e3e3e3e3e3",
 } as const;
 
 /** Demo password for every seeded account (local/dev only). */
@@ -187,6 +191,18 @@ async function seed(): Promise<void> {
     create: { id: IDS.activeTeam, name: "Forge United", seasonId: IDS.activeSeason },
   });
 
+  await prisma.team.upsert({
+    where: { id: IDS.jvTeam },
+    update: { name: "Forge United JV", seasonId: IDS.activeSeason },
+    create: { id: IDS.jvTeam, name: "Forge United JV", seasonId: IDS.activeSeason },
+  });
+
+  await prisma.team.upsert({
+    where: { id: IDS.msTeam },
+    update: { name: "Forge United Middle School", seasonId: IDS.activeSeason },
+    create: { id: IDS.msTeam, name: "Forge United Middle School", seasonId: IDS.activeSeason },
+  });
+
   await prisma.game.upsert({
     where: { id: IDS.archivedGame },
     update: {
@@ -240,12 +256,13 @@ async function seed(): Promise<void> {
 
   await prisma.roster.upsert({
     where: { id: IDS.roster },
-    update: { userId: IDS.player, teamId: IDS.activeTeam, jerseyNum: 7 },
+    update: { userId: IDS.player, teamId: IDS.activeTeam, jerseyNum: 7, position: "OH" },
     create: {
       id: IDS.roster,
       userId: IDS.player,
       teamId: IDS.activeTeam,
       jerseyNum: 7,
+      position: "OH",
     },
   });
 
@@ -334,6 +351,46 @@ async function seed(): Promise<void> {
     },
   });
 
+  const jvRegistration = await prisma.teamRegistration.upsert({
+    where: { teamId: IDS.jvTeam },
+    update: {
+      seasonId: IDS.activeSeason,
+      isOpen: true,
+      openedById: IDS.coach,
+    },
+    create: {
+      id: IDS.jvRegistration,
+      teamId: IDS.jvTeam,
+      seasonId: IDS.activeSeason,
+      isOpen: true,
+      openedById: IDS.coach,
+    },
+  });
+
+  await prisma.teamApplication.upsert({
+    where: {
+      registrationId_applicantId: { registrationId: jvRegistration.id, applicantId: IDS.parent2 },
+    },
+    update: {
+      playerFirstName: "Quinn",
+      playerLastName: "Pool",
+      playerEmail: "quinn-pool@demo.local",
+      preferredPosition: "S",
+      status: "PENDING",
+      note: "Looking for a setter spot on JV.",
+    },
+    create: {
+      id: IDS.jvApplication,
+      registrationId: jvRegistration.id,
+      applicantId: IDS.parent2,
+      playerFirstName: "Quinn",
+      playerLastName: "Pool",
+      playerEmail: "quinn-pool@demo.local",
+      preferredPosition: "S",
+      note: "Looking for a setter spot on JV.",
+    },
+  });
+
   await prisma.coachNote.upsert({
     where: { id: IDS.note },
     update: {
@@ -376,6 +433,7 @@ async function seed(): Promise<void> {
   console.log(`  active game id: ${IDS.activeGame}`);
   console.log(`  team id: ${IDS.activeTeam}`);
   console.log(`  concessions slot (cap 1): ${IDS.concessions}`);
+  console.log(`  JV registration: ${IDS.jvRegistration}`);
 }
 
 seed()
