@@ -1,3 +1,25 @@
 {
-  "mcpServers": {}
+  "mcpServers": {
+    "context7": {
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "${env:CONTEXT7_API_KEY}"
+      }
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@latest",
+        "--config",
+        "${workspaceFolder}/.cursor/playwright-mcp.json",
+        "--headless",
+        "--isolated",
+        "--no-sandbox",
+        "--output-dir",
+        "${workspaceFolder}/.playwright-mcp"
+      ]
+    }
+  }
 }

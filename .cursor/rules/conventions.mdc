@@ -20,9 +20,30 @@ Add a bullet only after it is a real project habit. Do not paste a style guide.
 - **One UI library:** do not mix shadcn with a second component kit unless the user asks.
 - **Recipes over invention:** use `assets/recipes/` via `add-integration` for auth, DB, payments, AI, etc.
 
+## Volleyball Manager (from Setup.md)
+
+- Monorepo at repo root: `apps/web-client`, `apps/api-server`, `packages/database`, `packages/shared-types`. Do not nest under `/volleyball-manager`.
+- Features are isolated NestJS modules plus matching App Router pages. Use `add-domain-module`.
+- Every application file, function, and interface gets an explanatory comment (`system-prompt.md`).
+- Tailwind only. Do not add shadcn or Storybook until asked. Defer `packages/ui-components`.
+- Auth is JWT + Nest guards, not Clerk/Auth.js, unless Setup.md is changed.
+- Shared types live in `packages/shared-types`; Prisma lives only in `packages/database`.
+- Domain folders: `volunteering`, `calendar`, `announcements`, `notes`, `seasons`, `teams`, `users`.
+- Local demo accounts live only in `packages/database/src/seed.ts` (`@demo.local` / `Demo1234!`). Re-seed restores Fall 2026 as the only active season.
+- API binds `0.0.0.0:$PORT`. Browser talks to `NEXT_PUBLIC_API_URL` (host-reachable).
+- `isDuesPaid` is written only at `PATCH /users/:id/dues` (ADMIN). `themeColor` is self-serve at `PATCH /users/me/theme`; ADMIN may still set another account at `PATCH /users/:id/theme`. Role is `PATCH /users/:id/role` (ADMIN). No generic `PATCH /users/:id`.
+- Public `POST /auth/register` is PARENT/PLAYER, or COACH with a one-time `coachKey`. ADMIN is never self-serve. Coach keys are ADMIN-generated (`POST /auth/coach-keys`); only the bcrypt hash is stored.
+- Team apply lives in the registrations module (`preview` pool → accept → `TeamsService.addRoster`). Coaches can `POST /teams` then `POST /registrations` from the same page. `Roster.position` is OH/MB/S/L/OPP/DS and is edited on `/roster`.
+- Roster add does not require `isDuesPaid`. Volunteer signup still uses `DuesPaidGuard` for PARENT.
+- Multi-team ICS import lives in the calendar module (`preview` then `commit`); `Game.externalUid` is the ICS UID. Export feeds stay per-team.
+- Account accent is CSS `--theme` / `--theme-strong`; Tailwind `court-400` / `court-600` read those vars so every module inherits the color.
+- Team/Game/Stat/VolunteerSlot lists default to the active season; historical needs `?historical=true&seasonId=`.
+- Volunteer register: transaction + `FOR UPDATE`; HTTP 409 when full. ADMIN creates; PARENT registers.
+- iCal DATE-TIME is `YYYYMMDDThhmmssZ` with `TZID:UTC`.
+
 ## After bootstrap
 
-- Replace or extend this section with conventions the agent actually observed or the user stated.
+- Extend this section only with habits the agent actually observed or the user stated.
 
 <!--
 - Example: API routes return `{ ok, data, error }` and never raw strings.

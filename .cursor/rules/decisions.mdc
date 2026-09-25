@@ -7,6 +7,132 @@ alwaysApply: false
 
 Record choices that later agents should not silently reverse. Newest first.
 
+## 2026-09-23 — Coach signup via generated invite keys
+
+- **Decision:** Coaches self-register at `POST /auth/register` with `role=COACH` plus a one-time `coachKey`. ADMIN generates keys at `POST /auth/coach-keys` (`crypto.randomBytes`); only a bcrypt `keyHash` is stored. List/revoke never return plaintext. ADMIN remains provision-only.
+- **Why:** Multiple coaches can join without a hardcoded secret in source. A leaked repo or env file cannot mint coach accounts.
+- **Alternatives rejected:** Hardcoded `COACH_SIGNUP_KEY` in code or `.env.example`; reusable shared password; public COACH without a key.
+- **Revisit when:** keys should expire on a timer or be scoped per team.
+
+## 2026-09-23 — Wave 2 registration + admin console
+
+- **Decision:** Public signup is `POST /auth/register` for PARENT/PLAYER (auto-login cookie), or COACH with a one-time invite key. Coaches open a `TeamRegistration` window; applicants land in `TeamApplication` (player pool); staff accept → roster with optional `RosterPosition`. `/admin` is a hub over dedicated writes (role, dues, provision, archive, volunteer, calendar URL, coach keys) — still no generic user PATCH.
+- **Why:** Club asked for apply/approve plus one admin place without reopening the dues/role escalation hole.
+- **Alternatives rejected:** Public ADMIN signup; treating apply as a second roster table; collapsing role/dues into one user update.
+- **Revisit when:** a payment processor or multi-club tenancy is named.
+
+## 2026-09-21 — Nest 10 + Express HTTP adapter
+
+- **Decision:** The API stays on Nest 10 with `@nestjs/platform-express` (and `@nestjs/platform-socket.io` for the stats gateway). Root `overrides` pin those packages to `^10.4.15`. `NestFactory.create(AppModule)` uses the Express default — not Fastify.
+- **Why:** `npm install @nestjs/platform-express@latest` pulls Nest 12 ESM (`"type": "module"`). Nest 10 core `require()`s the adapter and PackageLoader reports "No driver (HTTP)".
+- **Alternatives rejected:** Nest 12 (Node >= 20, Express 5, ESM); Fastify adapter (Setup.md is Express-style).
+- **Revisit when:** the stack is upgraded to Nest 12 as a coordinated bump of all `@nestjs/*` packages.
+
+## 2026-09-20 — LAN browser test via `dev:lan`
+
+- **Decision:** `npm run dev:lan` (`scripts/dev-lan.mjs`) auto-detects the host IPv4, binds Next (3010) and Nest (4010) on `0.0.0.0`, sets `NEXT_PUBLIC_API_URL=http://<LAN_IP>:4010` and adds that origin to `WEB_ORIGIN`. Documented in `TESTING.md`. Do not disable the firewall; document `ufw allow` instead.
+- **Why:** The Windows PC browser is not on this VM. `localhost` in `NEXT_PUBLIC_API_URL` makes the PC call itself, not the worker.
+- **Alternatives rejected:** Hardcoding 192.168.0.212 in source; opening CORS to `*`; disabling ufw.
+- **Revisit when:** a public URL or Tailscale-only access is the default.
+
+## 2026-09-20 — Per-account theme color (ADMIN)
+
+- **Decision:** Store `User.themeColor` (`#rrggbb`, default `#3dcf8e`). ADMIN writes it only at `PATCH /users/:id/theme`. The web client sets `--theme` / `--theme-strong` on `<html>` so Tailwind `court-400`/`court-600` recolor every module. No dark-mode overhaul.
+- **Why:** User asked for a simple per-account color wheel that is global across modules. A generic user PATCH would reopen the dues escalation hole.
+- **Alternatives rejected:** Club-wide single theme; self-serve theme editor; new design system.
+- **Revisit when:** the club wants a shared brand color instead of per-account accents.
+
+## 2026-09-20 — Remaining Setup.md modules in one local product
+
+- **Decision:** Ship iCal, announcements, coach notes, `archiveSeason`, ADMIN-only dues, plus team/roster/game-create so the club is demoable locally. Redis, Stripe, Storybook, and public signup stay out.
+- **Why:** User asked to build the whole remaining stack and test after. Setup.md names these modules; it does not require a payment processor or cached season id.
+- **Alternatives rejected:** Stopping after volunteer; adding Stripe for dues; Redis `activeSeasonId`; self-serve register.
+- **Revisit when:** A processor or production host is named.
+
+## 2026-09-20 — iCal feed is public (no JWT)
+
+- **Decision:** `GET /calendar/teams/:teamId/feed.ics` is unauthenticated so Google Calendar can subscribe. Times are UTC `YYYYMMDDThhmmssZ` with `TZID:UTC`.
+- **Why:** Calendar clients cannot send the httpOnly cookie. Team ids are UUIDs; the feed is schedule-only (no notes, dues, or emails).
+- **Alternatives rejected:** JWT-gated .ics (breaks subscribe); local TZID without Z.
+- **Revisit when:** the club wants signed/secret feed URLs.
+
+## 2026-09-20 — Volunteer module (capacity lock)
+
+- **Decision:** Isolated `VolunteeringModule`. ADMIN creates slots; PARENT registers; other roles list only. Capacity is `SELECT … FOR UPDATE` + recount, then insert; HTTP 409 when full or unique `(userId, slotId)` conflicts. Additive `seasonId` on `VolunteerSlot` so lists default to the active season (Setup.md model had no season).
+- **Why:** Setup.md names ADMIN for volunteer setup and PARENT for signup. Event-style counts, not `capacity = capacity - 1`. Season leakage was already a documented failure mode.
+- **Alternatives rejected:** COACH creating slots (not in Setup.md); PLAYER signup; check-then-insert without a lock; skipping seasonId.
+- **Revisit when:** volunteer slots should attach to a specific Game.
+
+## 2026-09-20 — First-slice security review
+
+```text
+Data: emails, password hashes, names, roles, isDuesPaid, game stats (likely youth PII later).
+Boundaries: browser → Nest (cookie/Bearer JWT) → Prisma/Postgres; Socket.io handshake JWT; no public register.
+Attackers: anonymous emit, PLAYER writing stats, isDuesPaid self-edit (no generic PATCH exists), archived-season leak, stolen JWT.
+```
+
+- **Fixed / designed in:** event-insert stats; active-season default; JWT required on HTTP + socket; COACH/ADMIN-only POST /stats; class-validator allowlists; parameterized Prisma; explicit CORS; login failures logged without email; httpOnly SameSite=Lax cookie; login 80/min/IP throttle (raised so `npm run smoke` can exercise every module).
+- **Medium accepted:** no CSRF token (SameSite=Lax + credentialed API on another port); Next.js 14.2.25 still has an Image Optimizer advisory — `images.unoptimized` is on; no refresh-token denylist.
+- **Open:** COPPA/consent before public launch; rotate `JWT_SECRET` playbook; Compose/host TLS.
+- **Revisit when:** public URL or self-serve signup.
+
+## 2026-09-20 — Embedded Postgres for Cloud smoke
+
+- **Decision:** When Docker is missing, `scripts/dev-postgres.mjs` (`embedded-postgres`) serves local migrate/seed/smoke on port 5433. Compose remains the documented runtime.
+- **Why:** First slice must be smokeable in Cloud Agents that have no Docker daemon.
+- **Alternatives rejected:** SQLite (Setup.md requires Postgres); skipping smoke.
+- **Revisit when:** Docker is the only supported path.
+
+## 2026-09-20 — Volleyball Manager from Setup.md
+
+- **Decision:** First product is **Volleyball Manager**. Stack is Next.js App Router + Tailwind, NestJS, PostgreSQL + Prisma, Socket.io, npm workspaces, Docker Compose. Repo root stays `Cursor_Forge`; layout is `apps/web-client`, `apps/api-server`, `packages/{database,shared-types,ui-components}`.
+- **Why:** `Setup.md` named this stack and DDD monorepo. Golden path (Next + shadcn + Vercel) is opt-in only when there is no preference.
+- **Alternatives rejected:** Golden path; single Next app with route handlers instead of NestJS; hosted Neon/Supabase; Vercel as the first deploy target; nesting the tree under `/volleyball-manager`.
+- **Revisit when:** Production host is chosen, or Setup.md is explicitly superseded.
+
+## 2026-09-20 — First slice is live stats only
+
+- **Decision:** First shippable slice is coach records a timestamped `Stat` event and a parent live board updates over Socket.io. Volunteer, iCal, announcements, coach notes, season archive UI, and payments stay out.
+- **Why:** `scope-feature` — one demo moment. The blueprint is a full platform; shipping it at once hides whether realtime + RBAC + season scope work.
+- **Alternatives rejected:** Scaffolding every module in Setup.md before a working path; Redis in v1; Stripe before a processor is named.
+- **Revisit when:** First-slice checklist is green (`assets/checklists/first-slice.md`).
+
+## 2026-09-24 — Playwright MCP is stdio + headless
+
+- **Decision:** Keep Playwright as a project stdio MCP (`npx @playwright/mcp@latest`) with `.cursor/playwright-mcp.json` (`browserName: chromium`, headless, isolated) plus `--no-sandbox`. Install Chromium in `environment.json` `install`. Snapshots go to gitignored `.playwright-mcp/`.
+- **Why:** Headed is the package default and needs a display. Cloud Agents and this worker have none, so the server never registered and UI verify fell back to curl. There is no hosted HTTP Playwright MCP.
+- **Alternatives rejected:** Headed default; Chrome-only channel (not on every machine); chrome-devtools MCP as a second browser server.
+- **Revisit when:** Cursor ships a hosted HTTP Playwright MCP, or laptop headed debug becomes the default.
+
+## 2026-09-20 — MCP: context7 + playwright only
+
+- **Decision:** Enable `context7` (HTTP docs) and `playwright` (browser verify). No Vercel, Neon, Supabase, Stripe, or GitHub MCP.
+- **Why:** Agents will look up Nest/Next/Prisma docs and smoke the coach/parent UI. Local Compose Postgres has no hosted-DB MCP. Dues are an ADMIN flag, not Stripe.
+- **Alternatives rejected:** Enabling the whole catalog; Vercel MCP despite Docker-first deploy.
+- **Revisit when:** A hosted DB, payment processor, or production PaaS is chosen.
+
+## 2026-09-20 — Threat model (auth, PII, dues flag, public API)
+
+```text
+Data: account (email, passwordHash, name), Role, isDuesPaid (payment status, not card data), coach notes, volunteer signups, game stats; likely youth/minor PII.
+Boundaries: browser → Next.js → NestJS → Postgres; Socket.io rooms; later public-ish iCal feed.
+Attackers: authenticated parent/player escalating role or isDuesPaid; stolen JWT; anonymous socket emit; concurrent volunteer overbook; iCal scrape.
+Blast radius: JWT_SECRET compromise = all sessions; DATABASE_URL = full club PII including minors; one COACH can write notes on rostered players.
+Logging: auth failures, role/dues changes, volunteer 409s. Never passwords, tokens, note bodies, or raw emails.
+Recovery: rotate JWT_SECRET and force re-login; Postgres restore from Compose volume/backup (runbook not written). Open: no refresh-token revocation list.
+Open risks: COPPA/parental consent before public launch; no payment processor; no key-rotation playbook; iCal caching/timezone; Redis not in v1 so active season is a DB read.
+```
+
+- **Guardrails from Setup.md:** event-sourced stats; default active-season queries; volunteer transaction + lock (409); UTC `scheduledAt`; `isDuesPaid` ADMIN-only endpoint.
+- **Revisit when:** public deploy, payments, or self-serve signup ships — run `security-review`.
+
+## 2026-09-19 — First product on a dedicated branch
+
+- **Decision:** First product bootstrap happens on `cursor/start-new-app-b09f`, leaving `main` as the blank starter until the app is real.
+- **Why:** User asked to familiarize, then start the app on a new branch. Product and stack are now named in the 2026-09-20 entries.
+- **Alternatives rejected:** Scaffolding on `main` immediately; picking golden path without confirmation.
+- **Revisit when:** First slice is merged to `main`.
+
 ## 2026-08-29 — Vibe coder capability layer
 
 - **Decision:** Golden path (`assets/stack-playbooks/golden-path.md`) is **opt-in** when the user has no stack preference — not an automatic default.

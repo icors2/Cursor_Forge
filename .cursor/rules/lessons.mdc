@@ -7,6 +7,47 @@ alwaysApply: false
 
 Write the mistake, the signal, and the fix. Newest first.
 
+## 2026-09-24 — Playwright MCP missing in Cloud
+
+- **Headed Playwright MCP never appears as tools.** Signal: `GetDynamicTools` has no `playwright` / `browser_*` namespace even though `.cursor/mcp.json` lists the server. Cause: `@playwright/mcp` defaults to headed; no `DISPLAY` on the worker. CLI `--browser chromium` is invalid (only chrome/firefox/webkit/msedge). Fix: `.cursor/playwright-mcp.json` with `browserName: "chromium"` plus `--headless --isolated --no-sandbox`, and `npx playwright install chromium` in `environment.json` `install`. Reload MCP. Cloud still needs the same stdio server in dashboard MCP.
+
+## 2026-09-23 — ICS import fetch
+
+- **Private ICS URLs / localhost feeds.** Signal: preview 400 "Calendar URL must be https" or "host is not allowed". Cause: import fetch is SSRF-gated (https only, no loopback/RFC1918). Fix: paste ICS text in the preview body (`icsText`) for local fixtures and smokes.
+
+## 2026-09-22 — Nest DI + tsx
+
+- **`Cannot read properties of undefined (reading 'login')` on `POST /auth/login`.** Signal: HTTP 500; `this.auth` undefined in `AuthController`. Cause: `tsx`/esbuild does not emit `design:paramtypes`, so Nest constructor injection is empty. Fix: `start:dev` runs `tsc` (with `emitDecoratorMetadata`) then `node --watch dist/main.js` via `apps/api-server/scripts/start-dev.mjs`. Do not use `tsx watch` for the Nest API.
+
+## 2026-09-21 — Nest HTTP driver
+
+- **`PackageLoader` / `No driver (HTTP)`.** Signal: Nest core loaded but `require('@nestjs/platform-express')` failed. Causes: skipped `npm install`, or installing `@nestjs/platform-express@latest` (Nest 12 ESM) next to Nest 10. Fix: keep all `@nestjs/{common,core,platform-express,platform-socket.io,websockets}` on `^10.4.15`; from repo root run `npm install`. Root `overrides` pin those packages. Do not switch to Fastify.
+
+## 2026-09-20 — LAN browser testing
+
+- **`NEXT_PUBLIC_API_URL=http://localhost:4010` breaks a PC browser.** Signal: the Windows machine calls itself, not the worker. Fix: `npm run dev:lan` sets `http://<LAN_IP>:4010` and adds `http://<LAN_IP>:3010` to `WEB_ORIGIN`. Override with `LAN_IP=…` (Tailscale IP works the same).
+- **Port 4010 leftover API still has localhost CORS.** Signal: `EADDRINUSE` or LAN origin rejected. Fix: stop the old listener (`ss -tlnp | grep 4010`) then restart `dev:lan`.
+- **`allowedDevOrigins` is unrecognized on Next 14.2.25.** Signal: `Invalid next.config.mjs` warning. Fix: omit it; `next dev -H 0.0.0.0` already serves LAN Host headers on this version.
+
+## 2026-09-20 — Remaining modules
+
+- **iCal clients ignore floating times.** Signal: Google Calendar shifts kickoff. Fix: store UTC; emit `DTSTART:YYYYMMDDThhmmssZ` and `TZID:UTC`.
+- **archiveSeason leaves two active rows if seed only upserts Fall 2026.** Signal: unique index `Season_one_active` fails or queries mix seasons. Fix: seed `updateMany({ isActive: false })` then activate Fall 2026.
+- **Generic PATCH /users is a dues escalation hole.** Signal: parent body includes `isDuesPaid: true`. Fix: dedicated ADMIN `PATCH /users/:id/dues`; do not add a generic user update.
+
+## 2026-09-20 — First-slice implementation
+
+- **`embedded-postgres` re-runs initdb on every start.** Signal: `directory exists but is not empty`. Fix: skip `initialise()` when `.local-pg/PG_VERSION` exists (`scripts/dev-postgres.mjs`).
+- **Prisma generate needs `DATABASE_URL` even when it does not connect.** Signal: schema env() error during `npm install`. Fix: `scripts/prisma-generate.mjs` supplies a dummy URL.
+
+## 2026-09-20 — Setup.md guardrails (do not rediscover)
+
+- **Counter updates lose rapid taps.** Signal: two coach taps, one increment. Fix: insert timestamped `Stat` event rows; aggregate on read.
+- **Archived teams leak onto the dashboard.** Signal: last year’s roster on the active home. Fix: default Prisma `where` to the active season; historical only with `?historical=true&seasonId=`.
+- **Volunteer last-slot race.** Signal: capacity+1 registrations. Fix: transaction + row lock; HTTP 409.
+- **Parents set their own dues.** Signal: PATCH user includes `isDuesPaid: true`. Fix: dedicated ADMIN-only endpoint; strip the field from generic user updates.
+- **iCal timezone drift.** Signal: game time wrong in Google Calendar. Fix: store UTC; emit `YYYYMMDDThhmmssZ` with TZID when that module ships.
+
 ## 2026-08-29 — Starter hardening
 
 - **Bare `npx` in MCP on Windows fails.** Signal: `spawn npx ENOENT`. Fix: use `"command": "cmd", "args": ["/c", "npx", …]` on Windows; keep `"command": "npx"` on macOS/Linux/Cloud. Documented in `assets/mcp-catalog.md`.

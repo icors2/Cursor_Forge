@@ -1,0 +1,17 @@
+---
+description: Volleyball Manager domain constraints (season scope, event-sourced stats, RBAC, comments).
+globs: "{apps,packages}/**/*.{ts,tsx,prisma}"
+alwaysApply: false
+---
+
+# Volleyball Manager domain
+
+- Follow `system-prompt.md` and `docs/repo-plan.md`. First slice is `docs/first-slice.md` only.
+- Every file, function, and interface gets an explanatory comment.
+- Isolate features as NestJS modules. Do not import another module’s internals.
+- Team / Game / Stat reads default to the active `Season`. Historical reads need an explicit flag + `seasonId`.
+- Record stats as inserted `Stat` event rows (type + timestamp). Never `count = count + 1`.
+- `isDuesPaid` and `role` change only through ADMIN-only endpoints. Public `POST /auth/register` is PARENT/PLAYER, or COACH with a one-time hashed invite key. ADMIN is never self-serve.
+- Store `scheduledAt` in UTC.
+- Volunteer registration: transaction + lock; HTTP 409 when full.
+- Validate at HTTP and WebSocket boundaries. Parameterize all Prisma queries.

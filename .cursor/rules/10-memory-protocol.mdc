@@ -8,7 +8,7 @@ Chat does not persist. These rules are the project's memory. Treat them as the s
 
 ## Read
 
-Before non-trivial work, read `.cursor/rules/memory.mdc`. Pull in `@decisions.mdc`, `@conventions.mdc`, or `@lessons.mdc` when the task touches those topics.
+Before non-trivial work, read `.cursor/rules/memory.mdc`. If Status is `active`, also read `docs/agent-handoff.md`. Pull in `@decisions.mdc`, `@conventions.mdc`, or `@lessons.mdc` when the task touches those topics.
 
 ## Write
 

@@ -4,7 +4,7 @@ alwaysApply: true
 
 # Cursor setup repo
 
-This repository starts blank. Until `.cursor/rules/memory.mdc` says the project is `active`, treat setup as the priority: MCP, skills, assets, then application code.
+This repository starts blank. Until `.cursor/rules/memory.mdc` says the project is `active`, treat setup as the priority: MCP, skills, assets, then application code. If **Status is `active`**, skip bootstrap and read `docs/agent-handoff.md`.
 
 ## First turn in an unbootstrapped repo
 

@@ -8,6 +8,19 @@ Cursor agents do not remember yesterday's thread. This repo treats **project rul
 
 GitHub: https://github.com/icors2/Cursor_Forge
 
+## Current product (this branch)
+
+**Volleyball Manager** — club volleyball seasons, rosters, live stats, volunteer, calendar, news, notes, dues, theme, admin console, and team registration.
+
+- **Restart handoff (agents):** `docs/agent-handoff.md`
+- Blueprint: `Setup.md`
+- Agent prompt: `system-prompt.md`
+- Repo plan: `docs/repo-plan.md`
+- First slice (historical): `docs/first-slice.md`
+- Club UX list: `docs/volleyball-manager-updates.md`
+
+Wave 1 + Wave 2 are implemented on `cursor/wave2-club-registration-7bd1` (PR #2). Run `npm install`, copy `.env.example` → `.env`, `npm run db:setup`, then `npm run dev:lan` (or `dev:api` + `dev:web`). See `AGENTS.md` and `TESTING.md`.
+
 ```bash
 git clone https://github.com/icors2/Cursor_Forge.git
 ```
@@ -87,7 +100,7 @@ Keep always-apply rules short. Long procedures belong in skills.
 
 ## MCP
 
-`.cursor/mcp.json` starts as `{ "mcpServers": {} }`. The agent merges servers from `assets/mcp-catalog.md` using `${env:NAME}` for secrets.
+`.cursor/mcp.json` enables **context7** and **playwright** only (docs + browser verify). Secrets use `${env:NAME}`.
 
 You still need to:
 
@@ -105,7 +118,7 @@ Never commit tokens.
 npm run verify
 ```
 
-Runs the Cursor layout audit and a secret scan. Needs Node 18+. No install step. A warning that status is `unbootstrapped` is expected until the first real project is set up.
+Runs the Cursor layout audit and a secret scan. Needs Node 18+. No install step. Working memory Status is `active` (Volleyball Manager plan).
 
 ## After bootstrap
 

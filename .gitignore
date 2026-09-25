@@ -3,6 +3,10 @@
 .env.*
 !.env.example
 
+# Embedded / local Postgres data (not Docker)
+.local-pg/
+data/
+
 # Dependencies and build
 node_modules/
 dist/
@@ -23,6 +27,7 @@ Thumbs.db
 
 # Cursor / Netlify / Vercel local
 .cursor/hooks/*.local.*
+.playwright-mcp/
 .netlify/
 .vercel/
 

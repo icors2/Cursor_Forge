@@ -8,43 +8,50 @@ Agents update this file. It is the living snapshot of the project.
 
 ## Status
 
-- **Status:** unbootstrapped
-- **Updated:** 2026-08-29
+- **Status:** active
+- **Updated:** 2026-09-25
 
 ## Project
 
-- **Name:** Cursor_Forge (starter template)
-- **Purpose:** Cursor IDE starter for coding agents — MCP, skills, assets, working memory, vibe loop (scope → build → verify → polish → deploy). Not yet a product app.
-- **Stack:** (unset — template only; opt-in golden path available)
-- **Package manager:** npm (scripts only; no app deps)
-- **Deploy target:** (unset)
+- **Name:** Volleyball Manager (`volleyball-manager`)
+- **Purpose:** Club platform for admins, coaches, players, and parents — seasons, rosters, live stats, volunteer, calendar, announcements, notes, dues.
+- **Audience:** Youth/club volleyball (ADMIN, COACH, PLAYER, PARENT).
+- **Stack:** Next.js 14 App Router + Tailwind (`apps/web-client`); NestJS (`apps/api-server`); PostgreSQL + Prisma (`packages/database`); Socket.io; npm workspaces; Docker Compose.
+- **Package manager:** npm workspaces (Node 18+)
+- **Deploy target:** Local Docker Compose first. Production host unset.
 
 ## Current focus
 
-- Vibe capability layer added: scope/deploy/debug/rollback, recipes, polish, guardrails, legal templates, opt-in golden path.
-- First product bootstrap still pending.
+- **Restart handout:** `docs/agent-handoff.md`
+- Wave 1 + Wave 2 are implemented and smoked on `cursor/wave2-club-registration-7bd1` (PR https://github.com/icors2/Cursor_Forge/pull/2, draft → `main`). `main` is still the blank starter.
+- Wave 1: role-aware nav, Stat Tracking, ICS import, news comments, volunteer cards, roster without dues, season history print, self-serve theme.
+- Wave 2: `/admin`; public PARENT/PLAYER register; COACH via one-time hashed invite; create-and-open on `/registrations`; player pool; `/roster` positions.
+- Playwright MCP is configured headless in-repo; Cloud still needs dashboard MCP + reload before browser tools appear.
+- Demo: sign in → `/home`. LAN: `npm run dev:lan` → `TESTING.md`.
+- Not in v1: Stripe, Redis, Storybook, public ADMIN signup, multi-club. Next: Playwright UI walk, merge PR #2, or a named Wave 3 / host.
 
 ## Open questions
 
-- What is the user building?
+- Production host (Render, Fly, VPS, …)?
+- Youth/minor PII consent (COPPA) before public launch?
+- Club branding / display name?
 
 ## Environment (names only)
 
-- Required env vars: (none yet — see `.env.example` for catalog names)
-- Enabled MCP servers: (none)
-- Project skills: bootstrap-project, add-mcp-server, create-project-skill, update-working-memory, audit-cursor-setup, security-review, verify-change, ship-change, scope-feature, deploy-app, debug-issue, checkpoint-rollback, add-integration, migrate-database, polish-ui
+- Required: `DATABASE_URL`, `JWT_SECRET`, `NEXT_PUBLIC_API_URL`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`
+- Optional: `JWT_EXPIRES_IN`, `PORT` / `API_PORT`, `WEB_ORIGIN`, `LAN_IP`, `CONTEXT7_API_KEY`, `REDIS_URL` (later)
+- Enabled MCP servers: context7 (HTTP), playwright (stdio, headless Chromium)
+- Project skills: starter set plus `add-domain-module`
 
 ## People and systems
 
-- (none)
+- Repo: https://github.com/icors2/Cursor_Forge
+- Postgres: Docker Compose or `npm run dev:pg` (embedded, `.local-pg/`)
+- No hosted DB or Stripe
 
 ## Pointers
 
-- Decisions: `.cursor/rules/decisions.mdc`
-- Conventions: `.cursor/rules/conventions.mdc`
-- Lessons: `.cursor/rules/lessons.mdc`
-- Security: `.cursor/rules/20-security.mdc` + `assets/checklists/security-review.md`
-- Recipes: `assets/recipes/`
-- MCP catalog: `assets/mcp-catalog.md`
-- Cost: `assets/reference/cost-and-quotas.md`
-- Verify: `npm run verify`
+- Restart: `docs/agent-handoff.md` · Plan: `docs/repo-plan.md` · Slice: `docs/first-slice.md` · LAN: `TESTING.md`
+- Seed users (local only): `packages/database/src/seed.ts`
+- Smoke: `npm run smoke` (stats, volunteer, iCal, announcements, notes, teams, dues, theme, archive, calendar-import, comments, registration)
+- Verify starter: `npm run verify`
