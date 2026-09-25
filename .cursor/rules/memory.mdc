@@ -9,7 +9,7 @@ Agents update this file. It is the living snapshot of the project.
 ## Status
 
 - **Status:** active
-- **Updated:** 2026-09-24
+- **Updated:** 2026-09-25
 
 ## Project
 
@@ -22,10 +22,13 @@ Agents update this file. It is the living snapshot of the project.
 
 ## Current focus
 
-- Wave 1 club UX is in: role-aware nav, Stat Tracking, ICS import, news comments, volunteer cards, roster without dues, season history print, self-serve theme.
-- Wave 2 is finished: `/admin` console; `POST /auth/register` (PARENT/PLAYER, or COACH with a one-time hashed invite from `POST /auth/coach-keys`); coach create-and-open on `/registrations`; player pool; `/roster` positions (`OH/MB/S/L/OPP/DS`).
-- Demo: sign in → `/home` hub. LAN browser test: `npm run dev:lan` → `TESTING.md`.
-- Not in v1: Stripe, Redis, Storybook, public ADMIN signup, multi-club. Next: production host or a named Wave 3.
+- **Restart handout:** `docs/agent-handoff.md`
+- Wave 1 + Wave 2 are implemented and smoked on `cursor/wave2-club-registration-7bd1` (PR https://github.com/icors2/Cursor_Forge/pull/2, draft → `main`). `main` is still the blank starter.
+- Wave 1: role-aware nav, Stat Tracking, ICS import, news comments, volunteer cards, roster without dues, season history print, self-serve theme.
+- Wave 2: `/admin`; public PARENT/PLAYER register; COACH via one-time hashed invite; create-and-open on `/registrations`; player pool; `/roster` positions.
+- Playwright MCP is configured headless in-repo; Cloud still needs dashboard MCP + reload before browser tools appear.
+- Demo: sign in → `/home`. LAN: `npm run dev:lan` → `TESTING.md`.
+- Not in v1: Stripe, Redis, Storybook, public ADMIN signup, multi-club. Next: Playwright UI walk, merge PR #2, or a named Wave 3 / host.
 
 ## Open questions
 
@@ -48,7 +51,7 @@ Agents update this file. It is the living snapshot of the project.
 
 ## Pointers
 
-- Plan: `docs/repo-plan.md` · Slice: `docs/first-slice.md` · LAN test: `TESTING.md`
+- Restart: `docs/agent-handoff.md` · Plan: `docs/repo-plan.md` · Slice: `docs/first-slice.md` · LAN: `TESTING.md`
 - Seed users (local only): `packages/database/src/seed.ts`
 - Smoke: `npm run smoke` (stats, volunteer, iCal, announcements, notes, teams, dues, theme, archive, calendar-import, comments, registration)
 - Verify starter: `npm run verify`

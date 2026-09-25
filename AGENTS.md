@@ -76,7 +76,8 @@ Cursor does not keep chat history as memory. **Rules are the memory.**
 
 ## Project-specific
 
-- **Product:** Volleyball Manager — club seasons, rosters, live stats, volunteer, calendar, announcements, coach notes, season archive, dues, per-account theme. Audience: ADMIN, COACH, PLAYER, PARENT.
+- **Restart / handoff:** `docs/agent-handoff.md` (read first on a new session). Working branch `cursor/wave2-club-registration-7bd1`. Draft PR https://github.com/icors2/Cursor_Forge/pull/2 → `main`. `main` is still the blank starter.
+- **Product:** Volleyball Manager — club seasons, rosters, live stats, volunteer, calendar, announcements, coach notes, season archive, dues, per-account theme, admin, registration. Audience: ADMIN, COACH, PLAYER, PARENT. Wave 1 + Wave 2 are in.
 - **Stack:** Next.js 14 App Router + Tailwind (`apps/web-client`), NestJS (`apps/api-server`), PostgreSQL + Prisma (`packages/database`), Socket.io, npm workspaces, Docker Compose.
 - **Install:** Node 18+ and npm. `npm install` at repo root (required before `dev:lan`). Copy `.env.example` to `.env` and fill values (never commit `.env`).
 - **Database:** `docker compose up postgres` **or** `npm run dev:pg` (embedded Postgres on 5433). Then `npm run db:setup` (migrate + seed).
@@ -91,3 +92,4 @@ Cursor does not keep chat history as memory. **Rules are the memory.**
 - **Security:** JWT httpOnly cookie + Bearer; `isDuesPaid` only via `PATCH /users/:id/dues` (ADMIN); `role` only via `PATCH /users/:id/role` (ADMIN); `themeColor` via `PATCH /users/me/theme` (self) or `PATCH /users/:id/theme` (ADMIN). `POST /auth/register` allowlists PARENT/PLAYER, or COACH with a one-time hashed invite (`POST /auth/coach-keys`, never stored in source). ICS import fetches https only and blocks private hosts. Per-team iCal export is public. Threat model in `decisions.mdc`. Re-run `security-review` before a public URL.
 - **Deploy URL / rollback:** none yet.
 - **Starter check:** `npm run verify`.
+- **After restart:** `npm install` → `npm run dev:pg` → `npm run db:setup` → `npm run dev:lan` (or `dev:api` + `dev:web`). Do not re-bootstrap. Playwright tools need a dashboard MCP reload.

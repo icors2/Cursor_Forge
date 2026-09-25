@@ -10,14 +10,16 @@ GitHub: https://github.com/icors2/Cursor_Forge
 
 ## Current product (this branch)
 
-**Volleyball Manager** — club volleyball seasons, rosters, and live game stats for admins, coaches, players, and parents.
+**Volleyball Manager** — club volleyball seasons, rosters, live stats, volunteer, calendar, news, notes, dues, theme, admin console, and team registration.
 
+- **Restart handoff (agents):** `docs/agent-handoff.md`
 - Blueprint: `Setup.md`
 - Agent prompt: `system-prompt.md`
 - Repo plan: `docs/repo-plan.md`
-- First slice: `docs/first-slice.md` (coach records a live stat; parent board updates)
+- First slice (historical): `docs/first-slice.md`
+- Club UX list: `docs/volleyball-manager-updates.md`
 
-First slice is implemented: login, coach stat pad, parent live board (`docs/first-slice.md`). Run `npm install`, copy `.env.example` → `.env`, `npm run db:setup`, then `npm run dev:api` and `npm run dev:web`.
+Wave 1 + Wave 2 are implemented on `cursor/wave2-club-registration-7bd1` (PR #2). Run `npm install`, copy `.env.example` → `.env`, `npm run db:setup`, then `npm run dev:lan` (or `dev:api` + `dev:web`). See `AGENTS.md` and `TESTING.md`.
 
 ```bash
 git clone https://github.com/icors2/Cursor_Forge.git

@@ -1,8 +1,8 @@
 # Volleyball Manager — club UX updates
 
-Source list used for Wave 1 polish and Wave 2 registration.
+Source list used for Wave 1 polish and Wave 2 registration. **Wave 1 and Wave 2 are implemented** on `cursor/wave2-club-registration-7bd1` (see `docs/agent-handoff.md`).
 
-## Wave 1 — module notes
+## Wave 1 — module notes (shipped)
 
 - **Home:** Top bar should span the system as buttons, not text-only links.
 - **Live:** Need a way to input live statistics.
@@ -16,7 +16,7 @@ Source list used for Wave 1 polish and Wave 2 registration.
 - **Dues:** Admin must be able to mark dues paid.
 - **Theme:** Per-account color, self-serve (not admin-only team colors).
 
-## Wave 2 — admin + registration
+## Wave 2 — admin + registration (shipped)
 
 - **Admin:** One console to run the club.
 - **Team registration:** Coach sets up a team apply window. A parent or player makes one account and applies to that team (Coach → Player). Unlimited teams.

@@ -1,5 +1,7 @@
 # First slice — live stat demo
 
+Historical scope. The live-stat slice **and** later Wave 1/2 club modules are implemented. New session: `docs/agent-handoff.md`.
+
 Scoped with `scope-feature` from `Setup.md`. One demo moment, not the full platform.
 
 ## Goal

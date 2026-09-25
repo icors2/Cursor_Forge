@@ -1,5 +1,7 @@
 # Testing Volleyball Manager from a Windows PC
 
+Agent restart: `docs/agent-handoff.md`.
+
 Headless Linux worker. The **human browser runs on the PC**, not on this VM. No desktop/GUI on the worker.
 
 Agents verify UI with **Playwright MCP** (stdio, headless Chromium) from `.cursor/mcp.json`. Reload MCP after pulling. Cloud Agents also need the same server in dashboard MCP. First-time browsers: `npx playwright install chromium`.

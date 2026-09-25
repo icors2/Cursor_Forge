@@ -3,7 +3,7 @@
 Canonical product spec: `Setup.md`. Agent master prompt: `system-prompt.md`.
 First shippable slice: `docs/first-slice.md`.
 
-First slice is **implemented** (`apps/`, `packages/`, `docker-compose.yml`). Later modules still follow `add-domain-module`.
+First slice **and** Wave 1/2 are implemented (`apps/`, `packages/`, `docker-compose.yml`). Restart handoff: `docs/agent-handoff.md`. New modules still follow `add-domain-module`.
 
 ## Product
 
@@ -60,7 +60,7 @@ Starter files (`.cursor/`, `assets/`, `AGENTS.md`) stay at the root.
 | --- | --- | --- |
 | PostgreSQL | System of record | Yes |
 | Socket.io | Live stat broadcast | Yes |
-| Google Calendar / iCal | Parent subscribe | No |
+| Google Calendar / iCal | Parent subscribe + ICS import | Yes (public per-team feed) |
 | Redis | Cached `activeSeasonId` | No (query `Season.isActive`) |
 | Payment processor | Dues | No (`isDuesPaid` ADMIN-only) |
 
@@ -121,6 +121,9 @@ See `decisions.mdc` (2026-09-20). Short form:
 2. Ship **first slice** (`docs/first-slice.md`) — live stat demo moment. **Done.**
 3. Volunteer + capacity lock. **Done** (`/volunteer`, `POST /volunteer/slots/:id/registrations`).
 4. iCal UTC, announcements, coach notes, season archive, dues admin, teams/roster. **Done** — `npm run smoke`.
+5. Wave 1 club UX (nav, Stat Tracking, ICS import, comments, volunteer cards, theme, season history). **Done.**
+6. Wave 2 admin + registration + roster positions. **Done** (`/admin`, `/register`, `/registrations`, `/roster`).
+7. Next (not started): Playwright dashboard MCP + browser walk, merge PR #2, or a named Wave 3 / production host.
 
 ## Guardrails (never skip)
 
